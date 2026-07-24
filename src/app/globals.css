@@ -1,0 +1,317 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/*
+ * ===========================================================================
+ * Project Atlas — design tokens
+ *
+ * Components never name a raw colour. They reference a semantic token
+ * (`bg-surface`, `text-muted-foreground`), and the token resolves per theme.
+ * That indirection is what makes a theme change a one-file edit instead of a
+ * thousand-component audit.
+ *
+ * Colours are authored in OKLCH. Unlike HSL, equal lightness values look
+ * equally light to the eye across hues, so a palette stays balanced when a hue
+ * shifts, and contrast ratios behave predictably between light and dark.
+ *
+ * The variable names follow the shadcn/ui contract deliberately, so any
+ * component pulled from that ecosystem drops in without a translation layer.
+ * ===========================================================================
+ */
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* ---- Base surfaces -------------------------------------------------- */
+  /* A faint cool cast rather than pure white: less clinical, easier to read. */
+  --background: oklch(0.994 0.0015 250);
+  --foreground: oklch(0.205 0.012 255);
+
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--foreground);
+
+  /* ---- Brand ----------------------------------------------------------
+   * "Meridian" — a deep navigational teal-blue. Chosen against the wall of
+   * indigo SaaS products, and because Atlas is about routes and coordinates.
+   */
+  --primary: oklch(0.548 0.114 218);
+  --primary-foreground: oklch(0.99 0.002 220);
+  --primary-hover: oklch(0.5 0.116 218);
+
+  --secondary: oklch(0.968 0.004 250);
+  --secondary-foreground: oklch(0.26 0.014 255);
+
+  --muted: oklch(0.972 0.003 250);
+  --muted-foreground: oklch(0.525 0.014 253);
+
+  --accent: oklch(0.955 0.012 215);
+  --accent-foreground: oklch(0.33 0.055 220);
+
+  --destructive: oklch(0.585 0.196 27);
+  --destructive-foreground: oklch(0.99 0.002 250);
+
+  --success: oklch(0.6 0.114 155);
+  --success-foreground: oklch(0.99 0.002 250);
+
+  --warning: oklch(0.735 0.14 78);
+  --warning-foreground: oklch(0.26 0.03 78);
+
+  /* ---- Lines and controls --------------------------------------------- */
+  --border: oklch(0.918 0.004 250);
+  --input: oklch(0.9 0.005 250);
+  --ring: oklch(0.548 0.114 218);
+
+  /* ---- Sidebar -------------------------------------------------------- */
+  /* Slightly recessed from the canvas so the workspace reads as the subject. */
+  --sidebar: oklch(0.978 0.003 250);
+  --sidebar-foreground: oklch(0.3 0.012 255);
+  --sidebar-accent: oklch(0.945 0.008 220);
+  --sidebar-accent-foreground: oklch(0.28 0.05 220);
+  --sidebar-border: oklch(0.915 0.004 250);
+  --sidebar-ring: var(--ring);
+
+  /* ---- Data visualisation --------------------------------------------- */
+  /* Distinguishable at equal lightness, and in the common colour-blind ranges. */
+  --chart-1: oklch(0.548 0.114 218);
+  --chart-2: oklch(0.64 0.12 165);
+  --chart-3: oklch(0.68 0.13 65);
+  --chart-4: oklch(0.58 0.15 300);
+  --chart-5: oklch(0.62 0.17 20);
+
+  /* ---- Geometry -------------------------------------------------------- */
+  --radius: 0.625rem;
+
+  /* ---- Elevation -------------------------------------------------------
+   * Layered, low-opacity shadows. A single hard shadow reads as cheap; light
+   * in the real world falls off gradually.
+   */
+  --shadow-subtle: 0 1px 2px 0 oklch(0.2 0.02 250 / 0.04);
+  --shadow-raised:
+    0 1px 2px -1px oklch(0.2 0.02 250 / 0.06), 0 2px 6px -1px oklch(0.2 0.02 250 / 0.06);
+  --shadow-overlay:
+    0 4px 12px -2px oklch(0.2 0.02 250 / 0.08),
+    0 12px 32px -8px oklch(0.2 0.02 250 / 0.12);
+
+  /* ---- Motion ----------------------------------------------------------
+   * Short and eased-out. Motion should confirm an action, never delay it.
+   */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+}
+
+.dark {
+  /* Not black. True black against bright text causes halation, and hides the
+   * elevation differences that give an interface its depth. */
+  --background: oklch(0.168 0.009 258);
+  --foreground: oklch(0.955 0.003 250);
+
+  --card: oklch(0.202 0.01 258);
+  --card-foreground: var(--foreground);
+
+  --popover: oklch(0.216 0.011 258);
+  --popover-foreground: var(--foreground);
+
+  --primary: oklch(0.715 0.115 213);
+  --primary-foreground: oklch(0.17 0.02 250);
+  --primary-hover: oklch(0.765 0.11 213);
+
+  --secondary: oklch(0.258 0.011 258);
+  --secondary-foreground: oklch(0.94 0.004 250);
+
+  --muted: oklch(0.248 0.01 258);
+  --muted-foreground: oklch(0.68 0.012 253);
+
+  --accent: oklch(0.288 0.026 218);
+  --accent-foreground: oklch(0.9 0.03 215);
+
+  --destructive: oklch(0.665 0.18 25);
+  --destructive-foreground: oklch(0.16 0.02 250);
+
+  --success: oklch(0.7 0.12 158);
+  --success-foreground: oklch(0.16 0.02 250);
+
+  --warning: oklch(0.79 0.13 80);
+  --warning-foreground: oklch(0.19 0.03 80);
+
+  --border: oklch(0.288 0.011 258);
+  --input: oklch(0.318 0.012 258);
+  --ring: oklch(0.715 0.115 213);
+
+  --sidebar: oklch(0.188 0.0095 258);
+  --sidebar-foreground: oklch(0.9 0.004 250);
+  --sidebar-accent: oklch(0.272 0.022 218);
+  --sidebar-accent-foreground: oklch(0.92 0.025 215);
+  --sidebar-border: oklch(0.272 0.011 258);
+  --sidebar-ring: var(--ring);
+
+  --chart-1: oklch(0.715 0.115 213);
+  --chart-2: oklch(0.72 0.12 165);
+  --chart-3: oklch(0.76 0.13 70);
+  --chart-4: oklch(0.68 0.15 300);
+  --chart-5: oklch(0.7 0.16 20);
+
+  /* Shadows carry less information in the dark; borders do that work instead. */
+  --shadow-subtle: 0 1px 2px 0 oklch(0 0 0 / 0.24);
+  --shadow-raised: 0 1px 2px -1px oklch(0 0 0 / 0.3), 0 2px 6px -1px oklch(0 0 0 / 0.3);
+  --shadow-overlay:
+    0 4px 12px -2px oklch(0 0 0 / 0.36), 0 12px 32px -8px oklch(0 0 0 / 0.44);
+}
+
+/*
+ * Expose the tokens as Tailwind utilities. `inline` resolves the var at build
+ * time so `bg-primary` compiles to the variable reference rather than a
+ * snapshot of its current value — which is what lets one class respond to a
+ * theme switch at runtime.
+ */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 10px);
+
+  --shadow-subtle: var(--shadow-subtle);
+  --shadow-raised: var(--shadow-raised);
+  --shadow-overlay: var(--shadow-overlay);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  --ease-out-quart: var(--ease-out-quart);
+  --ease-spring: var(--ease-spring);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    /* Reserve the scrollbar gutter so a short page and a long one do not
+     * shift horizontally relative to each other during navigation. */
+    scrollbar-gutter: stable;
+  }
+
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'cv11', 'ss01';
+    font-variation-settings: 'opsz' 32;
+  }
+
+  /*
+   * Focus is never removed, only refined. `:focus-visible` shows the ring for
+   * keyboard users while sparing mouse users a ring on every click — the
+   * accessible version of what `outline: none` gets wrong.
+   */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+
+  /* Tabular numerals keep figures from jittering as values update. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::selection {
+    @apply bg-primary/20 text-foreground;
+  }
+
+  /* Headings are optically tightened; default tracking looks loose at size. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply text-balance;
+    letter-spacing: -0.021em;
+  }
+
+  /* Long-form text reads better when the last line is not a single word. */
+  p {
+    @apply text-pretty;
+  }
+}
+
+@layer utilities {
+  /*
+   * A hairline that survives high-DPI rounding. A 1px border can render at
+   * 0.5px and disappear entirely on some retina displays.
+   */
+  .border-hairline {
+    border-width: 1px;
+    border-color: color-mix(in oklch, var(--border) 100%, transparent);
+  }
+
+  /* Understated section separator for marketing surfaces. */
+  .fade-edge {
+    mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      black 12%,
+      black 88%,
+      transparent
+    );
+  }
+}
+
+/*
+ * Respect the operating-system preference. Users who set this often do so for
+ * vestibular reasons, so this is an accessibility requirement rather than a
+ * courtesy. Durations collapse to ~0 without disabling behaviour that depends
+ * on a transition completing.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
