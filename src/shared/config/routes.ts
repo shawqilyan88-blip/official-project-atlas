@@ -9,8 +9,13 @@
 
 export const routes = {
   home: '/',
-  pricing: '/#pricing',
+  // Landing-page anchors. These previously carried a `pricing` key pointing at
+  // `/#pricing`, while the section it targeted was headed "How it works" and no
+  // pricing content existed anywhere — a mislabelled anchor and a nav item that
+  // promised something the page did not have.
   platform: '/#platform',
+  howItWorks: '/#how-it-works',
+  security: '/#security',
 
   signIn: '/sign-in',
   signUp: '/sign-up',

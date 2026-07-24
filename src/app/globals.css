@@ -36,10 +36,17 @@
   /* ---- Brand ----------------------------------------------------------
    * "Meridian" — a deep navigational teal-blue. Chosen against the wall of
    * indigo SaaS products, and because Atlas is about routes and coordinates.
+   *
+   * Lightness is pinned at 0.505 rather than anything brighter for a measured
+   * reason: the brand colour has to carry 12–13px text in two directions — as a
+   * fill behind `--primary-foreground`, and as `text-primary` over a 10% tint of
+   * itself in badges. At 0.548 those landed at 4.46:1 and 3.94:1, both under the
+   * 4.5:1 AA floor for small text. Darkening the ramp fixes every instance at
+   * once instead of patching each component.
    */
-  --primary: oklch(0.548 0.114 218);
+  --primary: oklch(0.505 0.118 218);
   --primary-foreground: oklch(0.99 0.002 220);
-  --primary-hover: oklch(0.5 0.116 218);
+  --primary-hover: oklch(0.45 0.12 218);
 
   --secondary: oklch(0.968 0.004 250);
   --secondary-foreground: oklch(0.26 0.014 255);
@@ -53,7 +60,11 @@
   --destructive: oklch(0.585 0.196 27);
   --destructive-foreground: oklch(0.99 0.002 250);
 
-  --success: oklch(0.6 0.114 155);
+  /* Darker than a "success green" instinct suggests, because this token is used
+   * as *text* on a 12% tint of itself (status chips, verification grades) as
+   * well as a fill. At 0.6 that text measured 3.27:1 — under the AA floor.
+   * White on this fill only improves as it darkens, so one value serves both. */
+  --success: oklch(0.487 0.117 157);
   --success-foreground: oklch(0.99 0.002 250);
 
   --warning: oklch(0.735 0.14 78);
@@ -62,7 +73,7 @@
   /* ---- Lines and controls --------------------------------------------- */
   --border: oklch(0.918 0.004 250);
   --input: oklch(0.9 0.005 250);
-  --ring: oklch(0.548 0.114 218);
+  --ring: oklch(0.505 0.118 218);
 
   /* ---- Sidebar -------------------------------------------------------- */
   /* Slightly recessed from the canvas so the workspace reads as the subject. */
@@ -75,7 +86,7 @@
 
   /* ---- Data visualisation --------------------------------------------- */
   /* Distinguishable at equal lightness, and in the common colour-blind ranges. */
-  --chart-1: oklch(0.548 0.114 218);
+  --chart-1: oklch(0.505 0.118 218);
   --chart-2: oklch(0.64 0.12 165);
   --chart-3: oklch(0.68 0.13 65);
   --chart-4: oklch(0.58 0.15 300);
