@@ -20,6 +20,11 @@ import {
 import { routes } from '@/shared/config/routes';
 import { Button, cn } from '@/shared/ui';
 
+import type { OpportunityCompany } from '@/modules/trade-opportunity/domain/opportunity-company';
+import type { ConversationMessage } from '@/modules/trade-opportunity/domain/outreach';
+
+import { CompaniesPanel } from './companies-panel';
+import { ConversationsPanel } from './conversations-panel';
 import { DocumentIntelligence } from './document-intelligence';
 import { DocumentList } from './document-list';
 import {
@@ -75,11 +80,15 @@ export function OpportunityWorkspace({
   intelligence,
   documents,
   timeline,
+  companies,
+  messages,
 }: {
   readonly opportunity: TradeOpportunity;
   readonly intelligence: OpportunityIntelligence;
   readonly documents: readonly OpportunityDocument[];
   readonly timeline: readonly OpportunityTimelineEvent[];
+  readonly companies: readonly OpportunityCompany[];
+  readonly messages: readonly ConversationMessage[];
 }) {
   const [active, setActive] = useState<TabId>('overview');
   const editHref = `${routes.opportunities}/${opportunity.id}/edit`;
@@ -157,14 +166,26 @@ export function OpportunityWorkspace({
         {active === 'overview' && (
           <OverviewPanel opportunity={opportunity} quality={intelligence.quality} />
         )}
-        {active === 'companies' && <CompaniesPanel objective={opportunity.objective} />}
+        {active === 'companies' && (
+          <CompaniesPanel
+            opportunityId={opportunity.id}
+            objective={opportunity.objective}
+            companies={companies}
+          />
+        )}
         {active === 'documents' && (
           <DocumentsPanel opportunityId={opportunity.id} documents={documents} />
         )}
         {active === 'analysis' && (
           <AnalysisPanel intelligence={intelligence} editHref={editHref} />
         )}
-        {active === 'conversations' && <ConversationsPanel />}
+        {active === 'conversations' && (
+          <ConversationsPanel
+            opportunityId={opportunity.id}
+            companies={companies}
+            messages={messages}
+          />
+        )}
         {active === 'timeline' && (
           <TimelinePanel opportunity={opportunity} events={timeline} />
         )}
@@ -260,23 +281,6 @@ function OverviewPanel({
 // ---------------------------------------------------------------------------
 // Result surfaces — honest, empty seams until their engines ship.
 // ---------------------------------------------------------------------------
-
-function CompaniesPanel({ objective }: { objective: TradeObjective }) {
-  const who =
-    objective === 'find_suppliers'
-      ? 'suppliers'
-      : objective === 'both'
-        ? 'buyers and suppliers'
-        : 'buyers';
-  return (
-    <EmptyPanel
-      icon={UsersIcon}
-      title="No companies yet"
-      body={`Atlas will surface qualified ${who} for this opportunity, ranked by fit and trade signals. They appear here the moment discovery activates.`}
-      badge="Discovery activating soon"
-    />
-  );
-}
 
 function DocumentsPanel({
   opportunityId,
@@ -504,17 +508,6 @@ function QualityMeter({
         {quality.headline}
       </p>
     </div>
-  );
-}
-
-function ConversationsPanel() {
-  return (
-    <EmptyPanel
-      icon={MessagesSquareIcon}
-      title="No conversations yet"
-      body="Every thread with buyers and suppliers on this opportunity lands here — one place for outreach, replies, and follow-ups, with nothing sent without your approval."
-      badge="Outreach activating soon"
-    />
   );
 }
 

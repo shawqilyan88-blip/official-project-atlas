@@ -18,13 +18,27 @@ import type {
 import { SupabaseTradeDocumentStorage } from '@/modules/trade-profile/infrastructure/supabase-trade-document-storage';
 import { SupabaseTradeProfileRepository } from '@/modules/trade-profile/infrastructure/supabase-trade-profile-repository';
 import type {
+  CompanyRanker,
+  DiscoveryProvider,
   DocumentExtractor,
+  MessageDrafter,
+  OpportunityCompanyRepository,
   OpportunityDocumentRepository,
   OpportunityDocumentStorage,
+  OpportunityMessageRepository,
   OpportunityTimelineRepository,
+  OutreachAuditLog,
+  OutreachChannel,
   TradeOpportunityRepository,
 } from '@/modules/trade-opportunity/application/ports';
+import { AnthropicCompanyRanker } from '@/modules/trade-opportunity/infrastructure/anthropic-company-ranker';
 import { AnthropicDocumentExtractor } from '@/modules/trade-opportunity/infrastructure/anthropic-document-extractor';
+import { AnthropicMessageDrafter } from '@/modules/trade-opportunity/infrastructure/anthropic-message-drafter';
+import { NullDiscoveryProvider } from '@/modules/trade-opportunity/infrastructure/null-discovery-provider';
+import { NullOutreachChannel } from '@/modules/trade-opportunity/infrastructure/null-outreach-channel';
+import { SupabaseOpportunityCompanyRepository } from '@/modules/trade-opportunity/infrastructure/supabase-opportunity-company-repository';
+import { SupabaseOpportunityMessageRepository } from '@/modules/trade-opportunity/infrastructure/supabase-opportunity-message-repository';
+import { SupabaseOutreachAuditLog } from '@/modules/trade-opportunity/infrastructure/supabase-outreach-audit-log';
 import { SupabaseOpportunityDocumentRepository } from '@/modules/trade-opportunity/infrastructure/supabase-opportunity-document-repository';
 import { SupabaseOpportunityDocumentStorage } from '@/modules/trade-opportunity/infrastructure/supabase-opportunity-document-storage';
 import { SupabaseOpportunityTimelineRepository } from '@/modules/trade-opportunity/infrastructure/supabase-opportunity-timeline-repository';
@@ -54,6 +68,19 @@ export interface ServerContainer {
   readonly opportunityDocuments: OpportunityDocumentRepository;
   readonly opportunityDocumentStorage: OpportunityDocumentStorage;
   readonly opportunityTimeline: OpportunityTimelineRepository;
+  /**
+   * Discovery providers, queried together. One today (the honest placeholder);
+   * adding a production data source is a new adapter pushed into this array — no
+   * other code changes.
+   */
+  readonly discoveryProviders: readonly DiscoveryProvider[];
+  readonly companyRanker: CompanyRanker;
+  readonly opportunityCompanies: OpportunityCompanyRepository;
+  readonly messageDrafter: MessageDrafter;
+  /** Messaging channels — one today (the placeholder); add adapters here. */
+  readonly outreachChannels: readonly OutreachChannel[];
+  readonly opportunityMessages: OpportunityMessageRepository;
+  readonly outreachAuditLog: OutreachAuditLog;
 }
 
 export async function createServerContainer(): Promise<ServerContainer> {
@@ -71,5 +98,14 @@ export async function createServerContainer(): Promise<ServerContainer> {
     opportunityDocuments: new SupabaseOpportunityDocumentRepository(client),
     opportunityDocumentStorage: new SupabaseOpportunityDocumentStorage(client),
     opportunityTimeline: new SupabaseOpportunityTimelineRepository(client),
+    // The provider array is the multi-provider seam: add adapters here.
+    discoveryProviders: [new NullDiscoveryProvider()],
+    companyRanker: new AnthropicCompanyRanker(),
+    opportunityCompanies: new SupabaseOpportunityCompanyRepository(client),
+    messageDrafter: new AnthropicMessageDrafter(),
+    // The channel array is the multi-channel seam: add adapters here.
+    outreachChannels: [new NullOutreachChannel()],
+    opportunityMessages: new SupabaseOpportunityMessageRepository(client),
+    outreachAuditLog: new SupabaseOutreachAuditLog(client),
   };
 }

@@ -412,6 +412,159 @@ export type Database = {
         };
         Relationships: [];
       };
+      opportunity_companies: {
+        Row: {
+          id: string;
+          organization_id: string;
+          opportunity_id: string;
+          role: Database['public']['Enums']['opportunity_company_role'];
+          name: string;
+          country: string | null;
+          website: string | null;
+          fit_score: number | null;
+          status: Database['public']['Enums']['opportunity_company_status'];
+          source: string | null;
+          metadata: Json;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          opportunity_id: string;
+          role: Database['public']['Enums']['opportunity_company_role'];
+          name: string;
+          country?: string | null;
+          website?: string | null;
+          fit_score?: number | null;
+          status?: Database['public']['Enums']['opportunity_company_status'];
+          source?: string | null;
+          metadata?: Json;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          opportunity_id?: string;
+          role?: Database['public']['Enums']['opportunity_company_role'];
+          name?: string;
+          country?: string | null;
+          website?: string | null;
+          fit_score?: number | null;
+          status?: Database['public']['Enums']['opportunity_company_status'];
+          source?: string | null;
+          metadata?: Json;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      opportunity_messages: {
+        Row: {
+          id: string;
+          organization_id: string;
+          opportunity_id: string;
+          company_id: string | null;
+          direction: Database['public']['Enums']['opportunity_message_direction'];
+          channel: string | null;
+          subject: string | null;
+          body: string;
+          status: Database['public']['Enums']['message_status'];
+          approved_by: string | null;
+          approved_at: string | null;
+          failed_reason: string | null;
+          ai_generated: boolean;
+          sent_at: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          opportunity_id: string;
+          company_id?: string | null;
+          direction: Database['public']['Enums']['opportunity_message_direction'];
+          channel?: string | null;
+          subject?: string | null;
+          body: string;
+          status?: Database['public']['Enums']['message_status'];
+          approved_by?: string | null;
+          approved_at?: string | null;
+          failed_reason?: string | null;
+          ai_generated?: boolean;
+          sent_at?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          opportunity_id?: string;
+          company_id?: string | null;
+          direction?: Database['public']['Enums']['opportunity_message_direction'];
+          channel?: string | null;
+          subject?: string | null;
+          body?: string;
+          status?: Database['public']['Enums']['message_status'];
+          approved_by?: string | null;
+          approved_at?: string | null;
+          failed_reason?: string | null;
+          ai_generated?: boolean;
+          sent_at?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      outreach_audit_log: {
+        Row: {
+          id: string;
+          organization_id: string;
+          opportunity_id: string;
+          company_id: string | null;
+          message_id: string | null;
+          channel: string | null;
+          actor: string | null;
+          event: Database['public']['Enums']['outreach_audit_event'];
+          result: string | null;
+          detail: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          opportunity_id: string;
+          company_id?: string | null;
+          message_id?: string | null;
+          channel?: string | null;
+          actor?: string | null;
+          event: Database['public']['Enums']['outreach_audit_event'];
+          result?: string | null;
+          detail?: Json;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          opportunity_id?: string;
+          company_id?: string | null;
+          message_id?: string | null;
+          channel?: string | null;
+          actor?: string | null;
+          event?: Database['public']['Enums']['outreach_audit_event'];
+          result?: string | null;
+          detail?: Json;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       opportunity_timeline_events: {
         Row: {
           id: string;
@@ -497,6 +650,24 @@ export type Database = {
         | 'company_profile'
         | 'product_catalog'
         | 'other';
+      opportunity_company_role: 'buyer' | 'supplier';
+      opportunity_company_status:
+        | 'suggested'
+        | 'shortlisted'
+        | 'contacted'
+        | 'qualified'
+        | 'rejected';
+      opportunity_message_direction: 'inbound' | 'outbound';
+      message_status: 'draft' | 'approved' | 'sending' | 'sent' | 'failed';
+      outreach_audit_event:
+        | 'draft_created'
+        | 'draft_regenerated'
+        | 'draft_edited'
+        | 'draft_approved'
+        | 'message_send_attempted'
+        | 'message_sent'
+        | 'message_failed'
+        | 'reply_received';
     };
     CompositeTypes: Record<never, never>;
   };
@@ -523,3 +694,6 @@ export type TradeProfileDocumentRow = Tables<'trade_profile_documents'>;
 export type TradeOpportunityRow = Tables<'trade_opportunities'>;
 export type OpportunityDocumentRow = Tables<'opportunity_documents'>;
 export type OpportunityTimelineEventRow = Tables<'opportunity_timeline_events'>;
+export type OpportunityCompanyRow = Tables<'opportunity_companies'>;
+export type OpportunityMessageRow = Tables<'opportunity_messages'>;
+export type OutreachAuditLogRow = Tables<'outreach_audit_log'>;

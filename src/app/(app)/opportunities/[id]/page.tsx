@@ -32,8 +32,13 @@ export default async function OpportunityPage({
   const { id } = await params;
   const context = await requireTenantContext();
 
-  const { tradeOpportunities, opportunityDocuments, opportunityTimeline } =
-    await createServerContainer();
+  const {
+    tradeOpportunities,
+    opportunityDocuments,
+    opportunityTimeline,
+    opportunityCompanies,
+    opportunityMessages,
+  } = await createServerContainer();
   const result = await tradeOpportunities.findById(id);
 
   if (!isSuccess(result) || result.value === null) {
@@ -47,14 +52,24 @@ export default async function OpportunityPage({
 
   // Everything the workspace needs, in parallel. Each read degrades to empty on
   // failure (e.g. before the documents migration is applied) — never a crash.
-  const [historyResult, documentsResult, timelineResult] = await Promise.all([
+  const [
+    historyResult,
+    documentsResult,
+    timelineResult,
+    companiesResult,
+    messagesResult,
+  ] = await Promise.all([
     tradeOpportunities.list(context.organization.id),
     opportunityDocuments.list(id),
     opportunityTimeline.list(id),
+    opportunityCompanies.list(id),
+    opportunityMessages.list(id),
   ]);
   const history = isSuccess(historyResult) ? historyResult.value : [];
   const documents = isSuccess(documentsResult) ? documentsResult.value : [];
   const timeline = isSuccess(timelineResult) ? timelineResult.value : [];
+  const companies = isSuccess(companiesResult) ? companiesResult.value : [];
+  const messages = isSuccess(messagesResult) ? messagesResult.value : [];
 
   const intelligence = {
     summary: summariseOpportunity(opportunity),
@@ -68,6 +83,8 @@ export default async function OpportunityPage({
       intelligence={intelligence}
       documents={documents}
       timeline={timeline}
+      companies={companies}
+      messages={messages}
     />
   );
 }
