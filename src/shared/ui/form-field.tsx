@@ -3,14 +3,20 @@
 import { useId } from 'react';
 import type * as React from 'react';
 
+import { InfoTooltip } from './info-tooltip';
 import { Input, type InputProps } from './input';
 import { Label } from './label';
+import { OptionalBadge, type OptionalLevel } from './optional-badge';
 import { cn } from './utils/cn';
 
 export interface FormFieldProps extends Omit<InputProps, 'id' | 'invalid'> {
   label: string;
   /** Guidance shown under the control, before any error appears. */
   hint?: string;
+  /** An educational tooltip attached to the label via an ⓘ affordance. */
+  info?: string;
+  /** Marks the field as optional (or optional-but-recommended) in the label. */
+  optional?: OptionalLevel;
   /** Validation messages for this field. Presence switches it to the error state. */
   errors?: readonly string[] | undefined;
 }
@@ -27,6 +33,8 @@ export interface FormFieldProps extends Omit<InputProps, 'id' | 'invalid'> {
 export function FormField({
   label,
   hint,
+  info,
+  optional,
   errors,
   className,
   required,
@@ -52,6 +60,12 @@ export function FormField({
         {required === true && (
           <span className="ml-0.5 text-destructive" aria-hidden="true">
             *
+          </span>
+        )}
+        {optional !== undefined && <OptionalBadge level={optional} />}
+        {info !== undefined && (
+          <span className="ml-1.5">
+            <InfoTooltip label={label}>{info}</InfoTooltip>
           </span>
         )}
       </Label>

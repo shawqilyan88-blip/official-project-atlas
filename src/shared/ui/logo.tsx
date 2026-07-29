@@ -44,17 +44,39 @@ export function LogoMark({ className }: { className?: string }) {
   );
 }
 
+/**
+ * Sizes are a small fixed set rather than free-form classes.
+ *
+ * A wordmark whose glyph and type drift out of proportion is one of the fastest
+ * ways to make a site look unfinished, so the pairing of mark size to type size
+ * and tracking is decided here once and reused, not re-guessed per surface.
+ */
+const WORDMARK_SIZES = {
+  sm: { mark: 'size-6', text: 'text-[0.9375rem] tracking-tight', gap: 'gap-2' },
+  md: { mark: 'size-8', text: 'text-[1.1875rem] tracking-[-0.02em]', gap: 'gap-2.5' },
+  lg: { mark: 'size-9', text: 'text-[1.375rem] tracking-[-0.022em]', gap: 'gap-2.5' },
+  // Tracking tightens as the mark grows: letterforms that look correctly spaced
+  // at 15px read loose and scattered at 30px. Optical, not mathematical.
+  xl: { mark: 'size-12', text: 'text-[1.875rem] tracking-[-0.03em]', gap: 'gap-3' },
+} as const;
+
+export type WordmarkSize = keyof typeof WORDMARK_SIZES;
+
 export function Wordmark({
   className,
   markClassName,
+  size = 'sm',
 }: {
   className?: string;
   markClassName?: string;
+  size?: WordmarkSize;
 }) {
+  const scale = WORDMARK_SIZES[size];
+
   return (
-    <span className={cn('inline-flex items-center gap-2', className)}>
-      <LogoMark className={cn('size-6 text-primary', markClassName)} />
-      <span className="text-[0.9375rem] font-semibold tracking-tight">{site.name}</span>
+    <span className={cn('inline-flex items-center', scale.gap, className)}>
+      <LogoMark className={cn('text-primary', scale.mark, markClassName)} />
+      <span className={cn('font-semibold', scale.text)}>{site.name}</span>
     </span>
   );
 }

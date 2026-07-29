@@ -24,8 +24,11 @@ export const routes = {
   authError: '/auth/auth-code-error',
 
   onboarding: '/onboarding',
+  onboardingProfile: '/onboarding/profile',
 
   dashboard: '/dashboard',
+  opportunities: '/opportunities',
+  opportunityNew: '/opportunities/new',
   buyers: '/buyers',
   suppliers: '/suppliers',
   conversations: '/conversations',
@@ -33,6 +36,7 @@ export const routes = {
   outreach: '/outreach',
   settings: '/settings',
   settingsMembers: '/settings/members',
+  aboutYou: '/about-you',
 } as const;
 
 export type AppRoute = (typeof routes)[keyof typeof routes];

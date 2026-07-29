@@ -27,12 +27,28 @@ const clientSchema = z.object({
     .default('http://localhost:3000'),
 });
 
+/**
+ * An optional secret that tolerates a blank value. In a `.env` file an unset key
+ * is written `KEY=`, which arrives as `''` — not `undefined` — so a plain
+ * `.optional()` would reject it as "too short". Blank means "not set" here.
+ */
+const optionalSecret = z.preprocess(
+  (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+  z.string().min(20).optional(),
+);
+
 const serverSchema = z.object({
   /**
    * Optional in Sprint 1. Present only where a privileged operation genuinely
    * needs to bypass RLS; the code that reads it must justify why.
    */
-  SUPABASE_SECRET_KEY: z.string().min(20).optional(),
+  SUPABASE_SECRET_KEY: optionalSecret,
+  /**
+   * Anthropic API key for AI document extraction (Sprint 3.2). Optional: when
+   * absent, extraction reports "not configured" rather than failing — the app
+   * never fabricates extracted values. Server-only; never NEXT_PUBLIC_.
+   */
+  ANTHROPIC_API_KEY: optionalSecret,
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 });
 
@@ -75,6 +91,7 @@ function parseServerEnv(): ServerEnv {
 
   const parsed = serverSchema.safeParse({
     SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
+    ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
     NODE_ENV: process.env.NODE_ENV,
   });
 

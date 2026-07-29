@@ -4,6 +4,7 @@ import { Inter, JetBrains_Mono } from 'next/font/google';
 import { site } from '@/shared/config/site';
 import { ThemeProvider } from '@/shared/ui';
 
+import 'flag-icons/css/flag-icons.min.css';
 import './globals.css';
 
 /**

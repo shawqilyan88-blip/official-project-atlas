@@ -1,10 +1,10 @@
 import { cn } from '@/shared/ui';
 
 import { PreviewFrame } from './preview-frame';
-import { CONVERSATION, CONVERSATION_TRANSLATION } from './sample-data';
+import { CONVERSATION, CONVERSATION_RATIONALE } from './sample-data';
 
 /**
- * Conversations, shown in the language the counterparty actually writes in.
+ * A live buyer thread with an Atlas-drafted reply held for approval.
  *
  * The point this preview has to make is the approval gate: Atlas drafts, a
  * person sends. The draft is visibly pending rather than already delivered,
@@ -72,14 +72,14 @@ export function ConversationPreview({ className }: { className?: string }) {
           </div>
         ))}
 
-        {/* Translation sits beside the draft so a non-French speaker can approve
-            it without leaving the thread. */}
+        {/* Why the draft says what it says. Reasoning shown inline is what makes
+            an approval step meaningful rather than a rubber stamp. */}
         <div className="ml-auto max-w-[85%] rounded-lg border border-dashed border-border/60 bg-muted/30 px-3 py-2">
           <p className="text-[0.5625rem] font-medium tracking-wide text-muted-foreground uppercase">
-            English
+            Why this reply
           </p>
           <p className="mt-1 text-[0.6875rem] leading-relaxed text-muted-foreground">
-            {CONVERSATION_TRANSLATION}
+            {CONVERSATION_RATIONALE}
           </p>
         </div>
       </div>

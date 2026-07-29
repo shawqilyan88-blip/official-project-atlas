@@ -15,7 +15,8 @@ import {
 
 export const metadata: Metadata = {
   title: 'Create your workspace',
-  description: 'Set up your Atlas workspace.',
+  description:
+    'Set up the workspace where Atlas organizes your buyers, suppliers, and every deal.',
 };
 
 /** Reads the session on every request; there is nothing here to prerender. */
@@ -42,8 +43,9 @@ export default async function OnboardingPage() {
         <CardHeader>
           <CardTitle className="text-lg">Create your workspace</CardTitle>
           <CardDescription>
-            Everything in Atlas — buyers, suppliers, conversations, deals — lives inside a
-            workspace. You can invite your team once it exists.
+            Your workspace keeps everything in one place — buyers and suppliers,
+            conversations, documents, deals, contacts, and the market intelligence Atlas
+            gathers as you trade. You can invite your team once it exists.
           </CardDescription>
         </CardHeader>
 

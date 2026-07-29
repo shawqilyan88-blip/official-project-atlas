@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRef } from 'react';
 
 import { type Profile, displayName, initials } from '@/core/entities';
 import { LogOutIcon, SettingsIcon, UserIcon } from '@/shared/ui/icons';
@@ -20,6 +21,7 @@ import {
 
 export function UserMenu({ profile }: { profile: Profile }) {
   const name = displayName(profile);
+  const signOutForm = useRef<HTMLFormElement>(null);
 
   return (
     <DropdownMenu>
@@ -62,16 +64,26 @@ export function UserMenu({ profile }: { profile: Profile }) {
         <DropdownMenuSeparator />
 
         {/*
-          A form post rather than a click handler: signing out must invalidate
-          the session server-side and clear httpOnly cookies, neither of which
-          client JavaScript can do.
+          Sign-out is a form post, not a client handler: invalidating the
+          session and clearing the httpOnly cookies must happen server-side.
+
+          But a bare submit button inside a Radix menu item does NOT work: the
+          click makes Radix close the menu, which unmounts this portaled form
+          before the native submit fires, so the action never runs. The fix is
+          to drive it through `onSelect` — `preventDefault()` keeps the menu (and
+          this form) mounted, and `requestSubmit()` posts the form explicitly.
+          Kept as a real <form> so it still degrades to a normal submit.
         */}
-        <form action={signOutAction}>
-          <DropdownMenuItem asChild variant="destructive">
-            <button type="submit" className="w-full">
-              <LogOutIcon aria-hidden="true" />
-              Sign out
-            </button>
+        <form ref={signOutForm} action={signOutAction}>
+          <DropdownMenuItem
+            variant="destructive"
+            onSelect={(event) => {
+              event.preventDefault();
+              signOutForm.current?.requestSubmit();
+            }}
+          >
+            <LogOutIcon aria-hidden="true" />
+            Sign out
           </DropdownMenuItem>
         </form>
       </DropdownMenuContent>

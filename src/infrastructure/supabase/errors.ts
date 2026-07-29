@@ -28,6 +28,14 @@ const PgError = {
   CheckViolation: '23514',
   NotNullViolation: '23502',
   InsufficientPrivilege: '42501',
+  /** PostgreSQL: the referenced relation does not exist. */
+  UndefinedTable: '42P01',
+  /** PostgreSQL: the referenced column does not exist. */
+  UndefinedColumn: '42703',
+  /** PostgREST: table not in the schema cache (a migration is not applied). */
+  SchemaCacheTableMiss: 'PGRST205',
+  /** PostgREST: column not in the schema cache (a migration is not applied). */
+  SchemaCacheColumnMiss: 'PGRST204',
   /** PostgREST: a filter matched no rows where exactly one was required. */
   NoRowsReturned: 'PGRST116',
   /** PostgREST: RLS rejected the write. */
@@ -65,6 +73,23 @@ export function mapPostgrestError(error: PostgrestError): AppError {
     case PgError.NoRowsReturned:
       return new NotFoundError(undefined, { cause: error });
 
+    case PgError.UndefinedTable:
+    case PgError.UndefinedColumn:
+    case PgError.SchemaCacheTableMiss:
+    case PgError.SchemaCacheColumnMiss:
+      // The database is behind the application: a required table or column does
+      // not exist. This is a deployment gap (an unapplied migration), never user
+      // input — so name it loudly in the logs instead of hiding it behind a
+      // generic fault, which is what made this class of bug hard to diagnose.
+      console.error(
+        `[db] Schema mismatch (${error.code}): ${error.message}. ` +
+          'A required migration has not been applied to this database.',
+      );
+      return new InfrastructureError(
+        'This part of Atlas is not fully set up yet. If this persists, a database migration is pending.',
+        { cause: error },
+      );
+
     default:
       return new InfrastructureError(undefined, { cause: error });
   }
@@ -81,14 +106,13 @@ export function mapAuthError(error: AuthError): AppError {
   const status = error.status ?? 0;
   const code = error.code ?? '';
 
-  if (code === 'invalid_credentials' || status === 400) {
-    return new ValidationError(
-      'That email and password combination is not correct.',
-      {},
-      { cause: error },
-    );
-  }
-
+  // Specific error codes are matched BEFORE the generic `status === 400`
+  // fallback below. Several distinct auth failures — a wrong password, an
+  // unconfirmed email, a weak password — all carry HTTP 400, so a `status`
+  // check placed first would swallow every one of them and show the wrong
+  // message. `email_not_confirmed` in particular must not read as "wrong
+  // password", or a user who simply hasn't clicked the link is sent chasing a
+  // credential problem that does not exist.
   if (code === 'email_not_confirmed') {
     return new ValidationError(
       'Please confirm your email address before signing in. Check your inbox for the link.',
@@ -106,6 +130,16 @@ export function mapAuthError(error: AuthError): AppError {
   if (code === 'weak_password') {
     return new ValidationError(
       'That password is too weak. Use a longer mix of letters and numbers.',
+      {},
+      { cause: error },
+    );
+  }
+
+  // Generic credential failure. Deliberately vague — distinguishing "no such
+  // account" from "wrong password" turns the form into an enumeration oracle.
+  if (code === 'invalid_credentials' || status === 400) {
+    return new ValidationError(
+      'That email and password combination is not correct.',
       {},
       { cause: error },
     );

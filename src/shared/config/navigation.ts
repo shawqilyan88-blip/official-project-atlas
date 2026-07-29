@@ -6,6 +6,8 @@ import {
   MessagesSquareIcon,
   SendIcon,
   SettingsIcon,
+  SparklesIcon,
+  TargetIcon,
   UsersIcon,
 } from '@/shared/ui/icons';
 
@@ -47,6 +49,13 @@ export const navigationGroups: readonly NavigationGroup[] = [
         href: routes.dashboard,
         icon: LayoutDashboardIcon,
         description: 'Your workspace at a glance',
+        available: true,
+      },
+      {
+        label: 'Opportunities',
+        href: routes.opportunities,
+        icon: TargetIcon,
+        description: 'Your reusable buyer and supplier searches',
         available: true,
       },
     ],
@@ -99,6 +108,13 @@ export const navigationGroups: readonly NavigationGroup[] = [
   {
     label: 'Administration',
     items: [
+      {
+        label: 'About you',
+        href: routes.aboutYou,
+        icon: SparklesIcon,
+        description: 'What Atlas has learned about how you work',
+        available: false,
+      },
       {
         label: 'Settings',
         href: routes.settings,

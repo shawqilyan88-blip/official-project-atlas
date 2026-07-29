@@ -49,14 +49,12 @@ export function PreviewFrame({
         className,
       )}
     >
-      {/* Window bar */}
-      <div className="flex h-10 items-center gap-3 border-b border-border bg-muted/40 px-3">
-        <span className="flex shrink-0 gap-1.5" aria-hidden="true">
-          <span className="size-2.5 rounded-full bg-foreground/15" />
-          <span className="size-2.5 rounded-full bg-foreground/15" />
-          <span className="size-2.5 rounded-full bg-foreground/15" />
-        </span>
-
+      {/* Window bar.
+          The three "traffic light" dots that used to sit here are gone. They
+          were skeuomorphic decoration imitating a desktop window, added nothing
+          to comprehension, and were never asked for — Atlas is a web product
+          and does not need to cosplay as a Mac app. */}
+      <div className="flex h-10 items-center gap-3 border-b border-border bg-muted/40 px-3.5">
         <span className="hidden min-w-0 items-center gap-1.5 rounded-md border border-border/70 bg-background/60 px-2 py-1 sm:flex">
           <span className="flex size-4 items-center justify-center rounded-[3px] bg-primary/12 text-[0.5rem] font-bold text-primary">
             {workspace.charAt(0)}
@@ -70,10 +68,13 @@ export function PreviewFrame({
           {view}
         </span>
 
-        <span className="ml-auto hidden shrink-0 items-center gap-1 md:flex">
-          <span className="rounded border border-border/70 px-1.5 py-0.5 font-mono text-[0.5625rem] text-muted-foreground">
-            ⌘K
-          </span>
+        {/* The sample-data disclosure lives in the chrome rather than as a
+            caption beneath the frame. The hero is a fixed single viewport, so a
+            caption costs vertical space the headline needs more — and stating it
+            inside the window is arguably more honest, since it sits on the
+            content it describes. */}
+        <span className="ml-auto shrink-0 rounded border border-border/70 px-1.5 py-0.5 text-[0.5625rem] font-medium text-muted-foreground">
+          Sample data
         </span>
       </div>
 
@@ -164,21 +165,5 @@ export function CountryChip({ code }: { code: string }) {
     <span className="rounded-[3px] border border-border/70 px-1 py-px font-mono text-[0.5625rem] font-medium tracking-wide text-muted-foreground">
       {code}
     </span>
-  );
-}
-
-/**
- * The honest caption that must accompany every preview.
- *
- * Uses `text-muted-foreground` at full strength. An opacity modifier such as
- * `/70` looks tempting for a caption, but the token is already calibrated to
- * sit just above the 4.5:1 floor — thinning it drops this text to 2.9:1 in
- * light mode. Muted is a colour, not an opacity.
- */
-export function PreviewCaption({ className }: { className?: string }) {
-  return (
-    <p className={cn('mt-3 text-center text-xs text-muted-foreground', className)}>
-      Product preview · sample data
-    </p>
   );
 }

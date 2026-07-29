@@ -35,46 +35,40 @@ export const DISCOVERY_QUERY = {
   volume: '2 × 40ft / month',
 } as const;
 
+/**
+ * Three rows, not four. The hero is a fixed single viewport, so every row costs
+ * vertical space that the headline and call to action need more.
+ */
 export const DISCOVERED_COMPANIES: readonly DiscoveredCompany[] = [
   {
-    id: 'nordwind',
-    company: 'Nordwind Keramik GmbH',
-    countryCode: 'DE',
-    city: 'Hamburg',
+    id: 'harbour-point',
+    company: 'Harbour Point Retail',
+    countryCode: 'GB',
+    city: 'Manchester',
     match: 96,
     trust: 'A',
     signal: '14 matching shipments in the last 90 days',
     status: 'New match',
   },
   {
-    id: 'vaillant',
-    company: 'Maison Vaillant SAS',
-    countryCode: 'FR',
-    city: 'Lyon',
+    id: 'cedar-stone',
+    company: 'Cedar & Stone Hospitality',
+    countryCode: 'NL',
+    city: 'Rotterdam',
     match: 92,
     trust: 'A',
     signal: 'Shifted sourcing away from a single origin',
     status: 'Replied',
   },
   {
-    id: 'kestrel',
-    company: 'Kestrel Hospitality Group',
-    countryCode: 'GB',
-    city: 'Leeds',
+    id: 'lakeside',
+    company: 'Lakeside Hotel Group',
+    countryCode: 'DE',
+    city: 'Hamburg',
     match: 88,
     trust: 'B',
     signal: 'Refit tender closes in three weeks',
     status: 'Contacted',
-  },
-  {
-    id: 'terrazza',
-    company: 'Terrazza Forniture SRL',
-    countryCode: 'IT',
-    city: 'Bologna',
-    match: 84,
-    trust: 'B',
-    signal: 'Warehouse capacity expanded last quarter',
-    status: 'New match',
   },
 ];
 
@@ -97,16 +91,16 @@ export interface ConversationMessage {
 }
 
 export const CONVERSATION = {
-  company: 'Maison Vaillant SAS',
-  channel: 'Email · French',
+  company: 'Cedar & Stone Hospitality',
+  channel: 'Email · Procurement',
   messages: [
     {
       id: 'm1',
-      author: 'Camille Vaillant',
-      initials: 'CV',
+      author: 'Sarah Whitfield',
+      initials: 'SW',
       side: 'them',
       time: '09:14',
-      body: 'Merci pour votre message. Pouvez-vous confirmer le délai pour 2 conteneurs en CIF Marseille ?',
+      body: 'Thanks for reaching out. Can you confirm the lead time for two containers, CIF Rotterdam?',
     },
     {
       id: 'm2',
@@ -115,14 +109,21 @@ export const CONVERSATION = {
       side: 'us',
       time: '09:15',
       drafted: true,
-      body: 'Bonjour Camille — 2 conteneurs en CIF Marseille, départ sous 18 jours, livraison estimée au 14 mars. Je joins la fiche technique et le certificat de conformité.',
+      body: 'Two containers CIF Rotterdam, departing within 18 days, estimated delivery 14 March. Technical sheet and certificate of conformity attached.',
     },
   ] satisfies readonly ConversationMessage[],
 } as const;
 
-/** Translation of the drafted reply, shown beside it. */
-export const CONVERSATION_TRANSLATION =
-  'Hello Camille — 2 containers CIF Marseille, departing within 18 days, estimated delivery 14 March. Technical sheet and certificate of conformity attached.';
+/**
+ * The reasoning shown beneath the drafted reply.
+ *
+ * Replaced an English translation of a French draft. The translation feature is
+ * real, but demonstrating it in the hero forced a visitor to read a language
+ * they may not know before they understood what the product does — a
+ * distraction sitting exactly where comprehension matters most.
+ */
+export const CONVERSATION_RATIONALE =
+  'Lead time and delivery date pulled from your current stock position. Certificate attached because this buyer requested one on their last enquiry.';
 
 export interface OutreachStep {
   readonly id: string;
@@ -147,17 +148,17 @@ export const OUTREACH_DRAFT = {
   subject: 'Stoneware tableware — EU stock, 18-day lead time',
   /** Segments marked `field` render as resolved merge fields. */
   body: [
-    { text: 'Hallo ' },
-    { text: 'Frau Brandt', field: true },
-    { text: ',\n\nSie importieren regelmäßig ' },
-    { text: 'Steinzeug-Geschirr', field: true },
-    { text: ' über ' },
-    { text: 'Hamburg', field: true },
+    { text: 'Hello ' },
+    { text: 'Ms Palmer', field: true },
+    { text: ',\n\nYou import ' },
+    { text: 'stoneware tableware', field: true },
+    { text: ' through ' },
+    { text: 'Rotterdam', field: true },
     {
-      text: '. Wir halten EU-Lagerbestand mit 18 Tagen Vorlauf und liefern auf FOB oder CIF.',
+      text: ' most quarters. We hold EU stock with an 18-day lead time and ship on FOB or CIF terms.',
     },
   ] as readonly { text: string; field?: boolean }[],
-  meta: 'German · sends 08:30 Hamburg time · 3 merge fields resolved',
+  meta: 'Sends 08:30 local time · 3 merge fields resolved',
 } as const;
 
 export interface PipelineStage {
@@ -171,26 +172,26 @@ export const PIPELINE: readonly PipelineStage[] = [
     id: 'qualified',
     name: 'Qualified',
     deals: [
-      { company: 'Terrazza Forniture', value: '€48k', age: '2d' },
-      { company: 'Nordwind Keramik', value: '€126k', age: '4d' },
+      { company: 'Fairfield Supply', value: '€48k', age: '2d' },
+      { company: 'Harbour Point Retail', value: '€126k', age: '4d' },
     ],
   },
   {
     id: 'conversation',
     name: 'In conversation',
     deals: [
-      { company: 'Maison Vaillant', value: '€92k', age: '6d' },
-      { company: 'Kestrel Hospitality', value: '€61k', age: '9d' },
+      { company: 'Cedar & Stone', value: '€92k', age: '6d' },
+      { company: 'Lakeside Hotel Group', value: '€61k', age: '9d' },
     ],
   },
   {
     id: 'quoted',
     name: 'Quoted',
-    deals: [{ company: 'Aalborg Bord A/S', value: '€154k', age: '12d' }],
+    deals: [{ company: 'Ridgeway Hotels', value: '€154k', age: '12d' }],
   },
   {
     id: 'contract',
     name: 'Contract',
-    deals: [{ company: 'Setúbal Mesa Lda', value: '€207k', age: '21d' }],
+    deals: [{ company: 'Meridian Home Supply', value: '€207k', age: '21d' }],
   },
 ];

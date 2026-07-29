@@ -136,6 +136,321 @@ export type Database = {
           },
         ];
       };
+      trade_profiles: {
+        Row: {
+          id: string;
+          organization_id: string;
+          products: string[];
+          industry: string | null;
+          roles: Database['public']['Enums']['trade_role'][];
+          looking_for: Database['public']['Enums']['trade_looking_for'] | null;
+          countries: string[];
+          production_capacity: string | null;
+          moq: string | null;
+          certifications: string[];
+          languages: string[];
+          business_types: string[];
+          company_size: string | null;
+          incoterms: string[];
+          payment_terms: string[];
+          currencies: string[];
+          website: string | null;
+          description: string | null;
+          completed_at: string | null;
+          skipped_at: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          products?: string[];
+          industry?: string | null;
+          roles?: Database['public']['Enums']['trade_role'][];
+          looking_for?: Database['public']['Enums']['trade_looking_for'] | null;
+          countries?: string[];
+          production_capacity?: string | null;
+          moq?: string | null;
+          certifications?: string[];
+          languages?: string[];
+          business_types?: string[];
+          company_size?: string | null;
+          incoterms?: string[];
+          payment_terms?: string[];
+          currencies?: string[];
+          website?: string | null;
+          description?: string | null;
+          completed_at?: string | null;
+          skipped_at?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          products?: string[];
+          industry?: string | null;
+          roles?: Database['public']['Enums']['trade_role'][];
+          looking_for?: Database['public']['Enums']['trade_looking_for'] | null;
+          countries?: string[];
+          production_capacity?: string | null;
+          moq?: string | null;
+          certifications?: string[];
+          languages?: string[];
+          business_types?: string[];
+          company_size?: string | null;
+          incoterms?: string[];
+          payment_terms?: string[];
+          currencies?: string[];
+          website?: string | null;
+          description?: string | null;
+          completed_at?: string | null;
+          skipped_at?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'trade_profiles_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: true;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      trade_opportunities: {
+        Row: {
+          id: string;
+          organization_id: string;
+          name: string;
+          objective: Database['public']['Enums']['trade_objective'];
+          product: string | null;
+          category: string | null;
+          target_markets: string[];
+          min_order_quantity: string | null;
+          target_price: string | null;
+          incoterms: string[];
+          required_certifications: string[];
+          keywords: string[];
+          exclude_keywords: string[];
+          payment_terms: string[];
+          currencies: string[];
+          criteria: string | null;
+          notes: string | null;
+          status: Database['public']['Enums']['opportunity_status'];
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+          archived_at: string | null;
+          last_opened_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          name: string;
+          objective?: Database['public']['Enums']['trade_objective'];
+          product?: string | null;
+          category?: string | null;
+          target_markets?: string[];
+          min_order_quantity?: string | null;
+          target_price?: string | null;
+          incoterms?: string[];
+          required_certifications?: string[];
+          keywords?: string[];
+          exclude_keywords?: string[];
+          payment_terms?: string[];
+          currencies?: string[];
+          criteria?: string | null;
+          notes?: string | null;
+          status?: Database['public']['Enums']['opportunity_status'];
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          archived_at?: string | null;
+          last_opened_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          name?: string;
+          objective?: Database['public']['Enums']['trade_objective'];
+          product?: string | null;
+          category?: string | null;
+          target_markets?: string[];
+          min_order_quantity?: string | null;
+          target_price?: string | null;
+          incoterms?: string[];
+          required_certifications?: string[];
+          keywords?: string[];
+          exclude_keywords?: string[];
+          payment_terms?: string[];
+          currencies?: string[];
+          criteria?: string | null;
+          notes?: string | null;
+          status?: Database['public']['Enums']['opportunity_status'];
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          archived_at?: string | null;
+          last_opened_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'trade_opportunities_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      trade_profile_documents: {
+        Row: {
+          id: string;
+          organization_id: string;
+          uploaded_by: string | null;
+          file_name: string;
+          storage_path: string;
+          mime_type: string | null;
+          size_bytes: number | null;
+          status: Database['public']['Enums']['document_analysis_status'];
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          uploaded_by?: string | null;
+          file_name: string;
+          storage_path: string;
+          mime_type?: string | null;
+          size_bytes?: number | null;
+          status?: Database['public']['Enums']['document_analysis_status'];
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          uploaded_by?: string | null;
+          file_name?: string;
+          storage_path?: string;
+          mime_type?: string | null;
+          size_bytes?: number | null;
+          status?: Database['public']['Enums']['document_analysis_status'];
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'trade_profile_documents_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      opportunity_documents: {
+        Row: {
+          id: string;
+          organization_id: string;
+          opportunity_id: string;
+          kind: Database['public']['Enums']['opportunity_document_kind'];
+          file_name: string;
+          storage_path: string;
+          mime_type: string | null;
+          size_bytes: number | null;
+          status: Database['public']['Enums']['document_analysis_status'];
+          extracted: Json | null;
+          version: number;
+          replaces_id: string | null;
+          is_current: boolean;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          opportunity_id: string;
+          kind?: Database['public']['Enums']['opportunity_document_kind'];
+          file_name: string;
+          storage_path: string;
+          mime_type?: string | null;
+          size_bytes?: number | null;
+          status?: Database['public']['Enums']['document_analysis_status'];
+          extracted?: Json | null;
+          version?: number;
+          replaces_id?: string | null;
+          is_current?: boolean;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          opportunity_id?: string;
+          kind?: Database['public']['Enums']['opportunity_document_kind'];
+          file_name?: string;
+          storage_path?: string;
+          mime_type?: string | null;
+          size_bytes?: number | null;
+          status?: Database['public']['Enums']['document_analysis_status'];
+          extracted?: Json | null;
+          version?: number;
+          replaces_id?: string | null;
+          is_current?: boolean;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      opportunity_timeline_events: {
+        Row: {
+          id: string;
+          organization_id: string;
+          opportunity_id: string;
+          kind: string;
+          title: string;
+          detail: string | null;
+          metadata: Json;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          opportunity_id: string;
+          kind: string;
+          title: string;
+          detail?: string | null;
+          metadata?: Json;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          opportunity_id?: string;
+          kind?: string;
+          title?: string;
+          detail?: string | null;
+          metadata?: Json;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<never, never>;
     Functions: {
@@ -169,6 +484,19 @@ export type Database = {
     };
     Enums: {
       app_role: 'member' | 'admin' | 'owner';
+      trade_role: 'manufacturer' | 'exporter' | 'importer' | 'trader' | 'distributor';
+      trade_looking_for: 'buyers' | 'suppliers' | 'both';
+      document_analysis_status: 'pending' | 'processing' | 'analyzed' | 'failed';
+      trade_objective: 'find_buyers' | 'find_suppliers' | 'both';
+      opportunity_status: 'draft' | 'active' | 'archived';
+      opportunity_document_kind:
+        | 'loi'
+        | 'rfq'
+        | 'purchase_order'
+        | 'product_spec'
+        | 'company_profile'
+        | 'product_catalog'
+        | 'other';
     };
     CompositeTypes: Record<never, never>;
   };
@@ -190,3 +518,8 @@ export type Enums<T extends keyof PublicSchema['Enums']> = PublicSchema['Enums']
 export type ProfileRow = Tables<'profiles'>;
 export type OrganizationRow = Tables<'organizations'>;
 export type MembershipRow = Tables<'memberships'>;
+export type TradeProfileRow = Tables<'trade_profiles'>;
+export type TradeProfileDocumentRow = Tables<'trade_profile_documents'>;
+export type TradeOpportunityRow = Tables<'trade_opportunities'>;
+export type OpportunityDocumentRow = Tables<'opportunity_documents'>;
+export type OpportunityTimelineEventRow = Tables<'opportunity_timeline_events'>;

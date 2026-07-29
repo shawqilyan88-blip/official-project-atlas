@@ -48,6 +48,17 @@
   --primary-foreground: oklch(0.99 0.002 220);
   --primary-hover: oklch(0.45 0.12 218);
 
+  /* Headline gradient.
+   *
+   * Its own token pair rather than borrowing `--primary` and `--chart-2`. Two
+   * reasons: the chart ramp is tuned for series distinguishability, not for
+   * carrying display type, and reusing it left the lightest stop at 3.11:1 —
+   * technically past the 3:1 large-text floor but far too thin a margin for the
+   * largest words on the page. The shift also stays inside the teal-to-blue
+   * family; running teal into green is the move that reads cheap. */
+  --headline-from: oklch(0.5 0.12 220);
+  --headline-to: oklch(0.42 0.13 252);
+
   --secondary: oklch(0.968 0.004 250);
   --secondary-foreground: oklch(0.26 0.014 255);
 
@@ -132,6 +143,11 @@
   --primary-foreground: oklch(0.17 0.02 250);
   --primary-hover: oklch(0.765 0.11 213);
 
+  /* Inverted for dark: the gradient has to travel *up* in lightness here, or
+   * the second half of the headline disappears into the background. */
+  --headline-from: oklch(0.74 0.11 210);
+  --headline-to: oklch(0.86 0.09 190);
+
   --secondary: oklch(0.258 0.011 258);
   --secondary-foreground: oklch(0.94 0.004 250);
 
@@ -190,6 +206,8 @@
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-hover: var(--primary-hover);
+  --color-headline-from: var(--headline-from);
+  --color-headline-to: var(--headline-to);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -288,7 +306,194 @@
   }
 }
 
+/*
+ * Ambient motion for the hero backdrop.
+ *
+ * Every animation here is slow, low-amplitude, and non-looping in appearance —
+ * atmosphere rather than movement. Anything that draws the eye away from the
+ * headline has failed at its job. The `prefers-reduced-motion` block at the
+ * foot of this file collapses all of it, so no separate opt-out is needed.
+ */
+@keyframes atlas-route-draw {
+  from {
+    stroke-dashoffset: var(--route-length, 900);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes atlas-signal {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes atlas-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -14px, 0);
+  }
+}
+
+@keyframes atlas-aurora {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translate3d(2%, -3%, 0) scale(1.08);
+  }
+}
+
+/*
+ * Dashboard motion.
+ *
+ * The brief asks for motion that is *subtle* — presence, not spectacle. These
+ * are short, eased, and mostly play once on mount. `atlas-rise` is the workhorse
+ * entrance; a per-element `--rise-delay` staggers a column so the interface
+ * assembles itself rather than snapping in. The global `prefers-reduced-motion`
+ * block at the foot of this file stills all of it, so no separate opt-out is
+ * needed.
+ */
+@keyframes atlas-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes atlas-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes atlas-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes atlas-orbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/*
+ * Overlays — dropdowns, combobox panels, popovers — arrive with a short lift and
+ * fade rather than snapping in. Fast enough to feel instant, present enough to
+ * read as "this opened", the way Linear and Arc surface transient UI.
+ */
+@keyframes atlas-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Indeterminate progress: a bar sweeping across its track while work is in flight. */
+@keyframes atlas-progress {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(420%);
+  }
+}
+
 @layer utilities {
+  /*
+   * Entrance. Set `--rise-delay` on each child to stagger a column; the
+   * `backwards` fill keeps elements invisible during their delay rather than
+   * flashing in first.
+   */
+  .animate-rise {
+    animation: atlas-rise 0.5s var(--ease-out-quart) both;
+    animation-delay: var(--rise-delay, 0ms);
+  }
+
+  /* Slow, ambient pulse for the AI presence indicator. */
+  .animate-breathe {
+    animation: atlas-breathe 4s ease-in-out infinite;
+  }
+
+  /* A thin rotating conic ring — the "Atlas is thinking / alive" motif. */
+  .animate-orbit {
+    animation: atlas-orbit 12s linear infinite;
+  }
+
+  /* Transient overlays: combobox panels, dropdowns, popovers. */
+  .animate-pop {
+    animation: atlas-pop 0.16s var(--ease-out-quart) both;
+    transform-origin: top;
+  }
+
+  .animate-progress-indeterminate {
+    animation: atlas-progress 1.1s var(--ease-out-quart) infinite;
+  }
+
+  /*
+   * A card that lifts a hair on hover. The whole transition — lift, shadow,
+   * border — moves together so it reads as one object responding, not three
+   * properties animating.
+   */
+  .hover-lift {
+    transition:
+      transform var(--duration-base) var(--ease-out-quart),
+      box-shadow var(--duration-base) var(--ease-out-quart),
+      border-color var(--duration-fast) ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px -16px color-mix(in oklch, var(--foreground) 32%, transparent);
+  }
+
+  /* Loading shimmer. Pair with a gradient background sized 200%. */
+  .animate-shimmer {
+    background-image: linear-gradient(
+      100deg,
+      transparent 20%,
+      color-mix(in oklch, var(--foreground) 6%, transparent) 40%,
+      color-mix(in oklch, var(--foreground) 6%, transparent) 60%,
+      transparent 80%
+    );
+    background-size: 200% 100%;
+    animation: atlas-shimmer 1.6s linear infinite;
+  }
+
   /*
    * A hairline that survives high-DPI rounding. A 1px border can render at
    * 0.5px and disappear entirely on some retina displays.
