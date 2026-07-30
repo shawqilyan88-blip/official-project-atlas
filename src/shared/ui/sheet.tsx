@@ -37,7 +37,7 @@ export function SheetContent({
     <DialogPrimitive.Portal>
       <DialogPrimitive.Overlay
         className={cn(
-          'fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px]',
+          'fixed inset-0 z-50 bg-scrim backdrop-blur-[2px]',
           'data-[state=closed]:animate-out data-[state=open]:animate-in',
           'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
         )}
@@ -48,7 +48,7 @@ export function SheetContent({
           'w-[17rem] flex-col border-r shadow-overlay',
           'transition ease-[--ease-out-quart]',
           'data-[state=closed]:animate-out data-[state=open]:animate-in',
-          'data-[state=closed]:duration-200 data-[state=open]:duration-300',
+          'data-[state=closed]:duration-[--duration-base] data-[state=open]:duration-[--duration-slow]',
           side === 'left'
             ? 'left-0 border-sidebar-border data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left'
             : 'right-0 border-r-0 border-l border-sidebar-border data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right',
@@ -69,10 +69,9 @@ export function SheetContent({
 
         <DialogPrimitive.Close
           className={cn(
-            'absolute top-3.5 right-3.5 rounded-md p-1 ring-offset-background',
+            'focus-ring absolute top-3.5 right-3.5 rounded-md p-1',
             'text-muted-foreground opacity-80 transition hover:text-foreground',
-            'hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-ring',
-            'focus-visible:ring-offset-2 focus-visible:outline-none',
+            'hover:bg-sidebar-accent',
           )}
         >
           <XIcon className="size-4" aria-hidden="true" />

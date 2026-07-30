@@ -82,8 +82,8 @@ export function InfoTooltip({
         onFocus={() => setOpen(true)}
         onBlur={() => setOpen(false)}
         className={cn(
-          'inline-flex size-4 shrink-0 items-center justify-center rounded-full align-middle text-muted-foreground/70 transition-colors',
-          'hover:text-foreground focus-visible:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+          'focus-ring inline-flex size-4 shrink-0 items-center justify-center rounded-full align-middle text-muted-foreground/70 transition-colors',
+          'hover:text-foreground focus-visible:text-foreground',
         )}
       >
         <InfoIcon className="size-3.5" aria-hidden="true" />
@@ -95,7 +95,7 @@ export function InfoTooltip({
             role="tooltip"
             id={tipId}
             style={style}
-            className="animate-pop pointer-events-none block rounded-lg border border-border bg-popover px-3 py-2 text-xs leading-relaxed text-popover-foreground shadow-lg"
+            className="animate-pop pointer-events-none block rounded-lg border border-border bg-popover px-3 py-2 text-xs leading-relaxed text-popover-foreground shadow-overlay"
           >
             {children}
           </span>,

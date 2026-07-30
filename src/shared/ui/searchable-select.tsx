@@ -218,7 +218,7 @@ export function SearchableSelect({
         {values.map((value) => (
           <span
             key={value}
-            className="inline-flex items-center gap-1 rounded-md bg-primary/10 py-1 pr-1 pl-2 text-[0.8125rem] font-medium text-primary"
+            className="inline-flex items-center gap-1 rounded-md bg-primary/10 py-1 pr-1 pl-2 text-caption font-medium text-primary"
           >
             {labelOf(value)}
             <button
@@ -248,7 +248,7 @@ export function SearchableSelect({
           <div
             ref={panelRef}
             style={panelStyle}
-            className="animate-pop overflow-hidden rounded-xl border border-border bg-popover shadow-lg"
+            className="animate-pop overflow-hidden rounded-xl border border-border bg-popover shadow-overlay"
           >
             <div className="flex items-center gap-2 border-b border-border/60 px-3">
               <SearchIcon

@@ -132,7 +132,7 @@ export function CommandCenter({
               <button
                 type="button"
                 onClick={() => setValue(suggestion)}
-                className="rounded-full border border-border/70 bg-background/50 px-3 py-1 text-xs text-muted-foreground transition hover:border-primary/40 hover:text-foreground"
+                className="focus-ring rounded-full border border-border/70 bg-background/50 px-3 py-1 text-xs text-muted-foreground transition hover:border-primary/40 hover:text-foreground"
               >
                 {suggestion}
               </button>

@@ -33,8 +33,7 @@ const buttonVariants = cva(
     'duration-[--duration-fast] ease-[--ease-out-quart]',
     // Pressing gives a small physical acknowledgement.
     'active:scale-[0.985]',
-    'focus-visible:ring-ring/60 focus-visible:ring-2 focus-visible:ring-offset-2',
-    'focus-visible:ring-offset-background focus-visible:outline-none',
+    'focus-ring',
     'disabled:pointer-events-none disabled:opacity-50',
     // Icons should never stretch, and never intercept the click.
     "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
@@ -55,7 +54,7 @@ const buttonVariants = cva(
         link: 'text-primary underline-offset-4 hover:underline',
       },
       size: {
-        sm: 'h-8 gap-1.5 px-3 text-[0.8125rem]',
+        sm: 'h-8 gap-1.5 px-3 text-caption',
         md: 'h-9 px-4 text-sm',
         lg: 'h-11 px-6 text-[0.9375rem]',
         // Square sizes for icon-only buttons.

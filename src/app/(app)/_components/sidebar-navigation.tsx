@@ -36,7 +36,7 @@ export function SidebarNavigation({
 
         return (
           <div key={group.label} className="space-y-1">
-            <h2 className="px-3 pb-1 text-[0.625rem] font-semibold tracking-[0.08em] text-muted-foreground/70 uppercase">
+            <h2 className="px-3 pb-1 text-micro font-semibold tracking-[0.08em] text-muted-foreground/70 uppercase">
               {group.label}
             </h2>
 
@@ -83,7 +83,7 @@ function NavigationLink({
       >
         <Icon className="size-[1.125rem] shrink-0 opacity-70" aria-hidden="true" />
         <span className="flex-1 truncate">{item.label}</span>
-        <span className="rounded-full border border-sidebar-border px-1.5 py-0 text-[0.625rem] font-medium text-sidebar-foreground/50">
+        <span className="rounded-full border border-sidebar-border px-1.5 py-0 text-micro font-medium text-sidebar-foreground/50">
           Soon
         </span>
       </span>
@@ -101,6 +101,7 @@ function NavigationLink({
       aria-current={isActive ? 'page' : undefined}
       className={cn(
         base,
+        'focus-ring',
         isActive
           ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
           : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground',

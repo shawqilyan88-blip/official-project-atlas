@@ -201,7 +201,7 @@ export function MarketSelect({
           <div
             ref={panelRef}
             style={panelStyle}
-            className="animate-pop overflow-hidden rounded-xl border border-border bg-popover shadow-lg"
+            className="animate-pop overflow-hidden rounded-xl border border-border bg-popover shadow-overlay"
           >
             <div className="flex items-center gap-2 border-b border-border/60 px-3">
               <SearchIcon
@@ -315,7 +315,7 @@ function MarketGlyph({ option }: { option: MarketOption }) {
 function Chip({ value, onRemove }: { value: string; onRemove: () => void }) {
   const option = MARKET_BY_VALUE.get(value);
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-md bg-primary/10 py-1 pr-1 pl-1.5 text-[0.8125rem] font-medium text-primary">
+    <span className="inline-flex items-center gap-1.5 rounded-md bg-primary/10 py-1 pr-1 pl-1.5 text-caption font-medium text-primary">
       {option?.kind === 'country' ? (
         <Flag code={option.code as string} />
       ) : option?.kind === 'region' ? (

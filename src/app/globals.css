@@ -117,6 +117,11 @@
     0 4px 12px -2px oklch(0.2 0.02 250 / 0.08),
     0 12px 32px -8px oklch(0.2 0.02 250 / 0.12);
 
+  /* Scrim — dims the page behind a dialog or drawer. Tinted with the shadow
+   * hue rather than pure black, so overlays sit in the same colour world as
+   * the elevation system. */
+  --scrim: oklch(0.2 0.02 250 / 0.4);
+
   /* ---- Motion ----------------------------------------------------------
    * Short and eased-out. Motion should confirm an action, never delay it.
    */
@@ -188,6 +193,10 @@
   --shadow-raised: 0 1px 2px -1px oklch(0 0 0 / 0.3), 0 2px 6px -1px oklch(0 0 0 / 0.3);
   --shadow-overlay:
     0 4px 12px -2px oklch(0 0 0 / 0.36), 0 12px 32px -8px oklch(0 0 0 / 0.44);
+
+  /* Deeper in the dark: the canvas is already low-lightness, so the scrim must
+   * lean on opacity to separate the drawer from the page behind it. */
+  --scrim: oklch(0 0 0 / 0.6);
 }
 
 /*
@@ -223,6 +232,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-scrim: var(--scrim);
 
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
@@ -242,6 +252,13 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 10px);
+
+  /* Semantic type sizes for the two values that recur across the product
+   * between Tailwind's `xs` and `sm` steps: `text-micro` for uppercase eyebrow
+   * labels and status pills, `text-caption` for secondary body and chip text.
+   * Size only — call sites keep their own leading. */
+  --text-micro: 0.625rem;
+  --text-caption: 0.8125rem;
 
   --shadow-subtle: var(--shadow-subtle);
   --shadow-raised: var(--shadow-raised);
@@ -280,6 +297,17 @@
    */
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-ring;
+  }
+
+  /*
+   * The single control focus recipe. Buttons, links, tabs, chips, and icon
+   * buttons opt in with `focus-ring` so every interactive control draws the
+   * same offset ring rather than each rolling its own. Text fields use a
+   * distinct inset glow (see `Input` and the selects), because a field's focus
+   * reads as "you are typing here", not "this is actionable".
+   */
+  .focus-ring:focus-visible {
+    @apply ring-2 ring-ring ring-offset-2 ring-offset-background outline-none;
   }
 
   /* Tabular numerals keep figures from jittering as values update. */

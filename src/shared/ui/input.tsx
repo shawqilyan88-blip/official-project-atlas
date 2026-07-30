@@ -16,11 +16,13 @@ export function Input({ className, type = 'text', invalid, ...props }: InputProp
       type={type}
       aria-invalid={invalid || undefined}
       className={cn(
-        'flex h-9 w-full rounded-md border border-input bg-background px-3 py-1',
+        'flex h-9 w-full rounded-xl border border-input bg-background px-3 py-1',
         'text-sm shadow-subtle',
         'placeholder:text-muted-foreground/70',
         'transition-[border-color,box-shadow] duration-[--duration-fast]',
-        'focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/25',
+        // The shared field-focus glow — matches the selects and tag input so
+        // every field lights the same way.
+        'focus-visible:border-primary/50 focus-visible:ring-4 focus-visible:ring-primary/15',
         'focus-visible:outline-none',
         'disabled:cursor-not-allowed disabled:opacity-60',
         // The file input's own button needs resetting to match the type scale.

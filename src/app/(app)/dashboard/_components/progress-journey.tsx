@@ -135,7 +135,7 @@ function StepRow({ step, isLast }: { step: JourneyStep; isLast: boolean }) {
 
   if (step.href !== undefined && step.state !== 'done' && step.state !== 'soon') {
     return (
-      <Link href={step.href} className={cn(base, 'hover:bg-muted/40')}>
+      <Link href={step.href} className={cn(base, 'focus-ring hover:bg-muted/40')}>
         {inner}
       </Link>
     );
