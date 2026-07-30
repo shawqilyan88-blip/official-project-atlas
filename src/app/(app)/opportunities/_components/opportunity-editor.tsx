@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { startTransition, useActionState, useState } from 'react';
+import { startTransition, useActionState, useRef, useState } from 'react';
 
 import { saveOpportunityAction } from '@/modules/trade-opportunity/actions';
 import {
@@ -20,6 +20,7 @@ import {
 } from '@/shared/data/business';
 import { routes } from '@/shared/config/routes';
 import { type ActionState, idleState } from '@/shared/lib/action-state';
+import { rovingIndex } from '@/shared/ui/utils/roving';
 import {
   Alert,
   Button,
@@ -106,6 +107,7 @@ export function OpportunityEditor({
   const [excludeDraft, setExcludeDraft] = useState('');
   const [criteria, setCriteria] = useState(initialDraft.criteria ?? '');
   const [notes, setNotes] = useState(initialDraft.notes ?? '');
+  const objectiveRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const suggestedName = suggestOpportunityName({ product, objective, markets });
   const backHref = opportunityId
@@ -175,18 +177,42 @@ export function OpportunityEditor({
         <div className="space-y-5 rounded-2xl border border-border/70 bg-card p-5">
           <div className="space-y-2">
             <span className="block text-sm font-medium">Who are you looking for?</span>
-            <div className="grid gap-2.5 sm:grid-cols-3">
-              {OBJECTIVE_OPTIONS.map((option) => {
+            {/* One choice among three — a radiogroup, with roving tabindex and
+                arrow-key navigation, not three independent pressed toggles. */}
+            <div
+              role="radiogroup"
+              aria-label="Who are you looking for?"
+              className="grid gap-2.5 sm:grid-cols-3"
+            >
+              {OBJECTIVE_OPTIONS.map((option, index) => {
                 const Icon = OBJECTIVE_ICON[option.value];
                 const selected = objective === option.value;
                 return (
                   <button
                     key={option.value}
+                    ref={(el) => {
+                      objectiveRefs.current[index] = el;
+                    }}
                     type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    tabIndex={selected ? 0 : -1}
                     onClick={() => setObjective(option.value)}
-                    aria-pressed={selected}
+                    onKeyDown={(event) => {
+                      const next = rovingIndex(
+                        event.key,
+                        index,
+                        OBJECTIVE_OPTIONS.length,
+                      );
+                      if (next < 0) return;
+                      event.preventDefault();
+                      const nextOption = OBJECTIVE_OPTIONS[next];
+                      if (!nextOption) return;
+                      setObjective(nextOption.value);
+                      objectiveRefs.current[next]?.focus();
+                    }}
                     className={cn(
-                      'flex flex-col items-start gap-1.5 rounded-xl border p-3 text-left transition-all duration-[--duration-fast]',
+                      'focus-ring flex flex-col items-start gap-1.5 rounded-xl border p-3 text-left transition-all duration-[--duration-fast]',
                       selected
                         ? 'border-primary/60 bg-primary/[0.06] ring-2 ring-primary/20'
                         : 'border-border bg-card hover:border-border/80 hover:bg-muted/40',

@@ -120,7 +120,7 @@ export function LoiUpload({
         onDrop={handleDrop}
         className={cn(
           'flex cursor-pointer flex-col items-center rounded-2xl border-2 border-dashed px-6 py-10 text-center transition-colors',
-          'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+          'focus-ring',
           dragging
             ? 'border-primary/60 bg-primary/[0.06]'
             : 'border-border bg-card hover:border-primary/40 hover:bg-muted/30',

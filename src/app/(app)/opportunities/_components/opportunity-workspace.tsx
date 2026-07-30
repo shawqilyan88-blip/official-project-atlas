@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useRef, useState } from 'react';
 
 import type {
   OpportunityDocument,
@@ -19,6 +19,7 @@ import {
 } from '@/modules/trade-opportunity/domain/trade-opportunity';
 import { routes } from '@/shared/config/routes';
 import { Button, cn } from '@/shared/ui';
+import { rovingIndex } from '@/shared/ui/utils/roving';
 
 import type { OpportunityCompany } from '@/modules/trade-opportunity/domain/opportunity-company';
 import type { ConversationMessage } from '@/modules/trade-opportunity/domain/outreach';
@@ -91,6 +92,7 @@ export function OpportunityWorkspace({
   readonly messages: readonly ConversationMessage[];
 }) {
   const [active, setActive] = useState<TabId>('overview');
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const editHref = `${routes.opportunities}/${opportunity.id}/edit`;
 
   return (
@@ -124,25 +126,46 @@ export function OpportunityWorkspace({
         </Button>
       </div>
 
-      {/* Tab bar — scrolls horizontally on narrow screens rather than wrapping. */}
+      {/* Tab bar — scrolls horizontally on narrow screens rather than wrapping.
+          Follows the WAI-ARIA Tabs pattern: roving tabindex (only the selected
+          tab is in the tab order), arrow keys move and activate, Home/End jump
+          to the ends, and each tab owns its panel via aria-controls. */}
       <div
         role="tablist"
         aria-label="Opportunity sections"
         className="flex gap-1 overflow-x-auto border-b border-border/70 pb-px"
       >
-        {TABS.map((tab) => {
+        {TABS.map((tab, index) => {
           const selected = tab.id === active;
           const Icon = tab.icon;
           return (
             <button
               key={tab.id}
+              ref={(el) => {
+                tabRefs.current[index] = el;
+              }}
+              id={`ow-tab-${tab.id}`}
               role="tab"
               type="button"
               aria-selected={selected}
+              aria-controls={`ow-panel-${tab.id}`}
+              // Roving tabindex: focus enters the tablist on the active tab,
+              // then the arrow keys take over from there.
+              tabIndex={selected ? 0 : -1}
               onClick={() => setActive(tab.id)}
+              onKeyDown={(event) => {
+                const next = rovingIndex(event.key, index, TABS.length, {
+                  vertical: false,
+                });
+                if (next < 0) return;
+                event.preventDefault();
+                const nextTab = TABS[next];
+                if (!nextTab) return;
+                setActive(nextTab.id);
+                tabRefs.current[next]?.focus();
+              }}
               className={cn(
-                'relative flex shrink-0 items-center gap-1.5 rounded-t-lg px-3 py-2 text-sm font-medium transition-colors',
-                'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+                'focus-ring relative flex shrink-0 items-center gap-1.5 rounded-t-lg px-3 py-2 text-sm font-medium transition-colors',
                 selected
                   ? 'text-foreground'
                   : 'text-muted-foreground hover:text-foreground',
@@ -161,8 +184,17 @@ export function OpportunityWorkspace({
         })}
       </div>
 
-      {/* Panels. `key` on the wrapper replays the entrance animation per tab. */}
-      <div key={active} className="animate-rise">
+      {/* The panel for the active tab. `key` replays the entrance animation and
+          gives keyboard users a focusable region (tabIndex 0) even when a panel
+          holds no focusable content. */}
+      <div
+        key={active}
+        role="tabpanel"
+        id={`ow-panel-${active}`}
+        aria-labelledby={`ow-tab-${active}`}
+        tabIndex={0}
+        className="animate-rise rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+      >
         {active === 'overview' && (
           <OverviewPanel opportunity={opportunity} quality={intelligence.quality} />
         )}
@@ -495,7 +527,15 @@ function QualityMeter({
           {quality.score}% · {tierLabel}
         </span>
       </div>
-      <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-muted">
+      <div
+        role="progressbar"
+        aria-label="Opportunity quality"
+        aria-valuenow={quality.score}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuetext={`${quality.score}% · ${tierLabel}`}
+        className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-muted"
+      >
         <div
           className={cn(
             'h-full rounded-full transition-[width] duration-[--duration-slow] ease-[--ease-out-quart]',

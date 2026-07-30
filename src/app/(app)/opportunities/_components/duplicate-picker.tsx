@@ -64,7 +64,7 @@ export function DuplicatePicker({
                   style={{ ['--rise-delay' as string]: `${index * 40}ms` }}
                   className={cn(
                     'hover-lift animate-rise group flex w-full items-center gap-3.5 rounded-2xl border border-border/70 bg-card p-4 text-left',
-                    'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+                    'focus-ring',
                   )}
                 >
                   <span

@@ -156,7 +156,7 @@ function AttentionRow({ item }: { item: BriefingItem }) {
   return (
     <Link
       href={item.href}
-      className="group flex items-start justify-between gap-2.5 rounded-md transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      className="focus-ring group flex items-start justify-between gap-2.5 rounded-md transition-colors"
     >
       {content}
     </Link>

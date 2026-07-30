@@ -18,6 +18,7 @@ export {
   CardTitle,
 } from './card';
 export { CollapsibleSection } from './collapsible-section';
+export { Dialog, DialogClose, DialogContent, DialogTrigger } from './dialog';
 export {
   DropdownMenu,
   DropdownMenuCheckboxItem,

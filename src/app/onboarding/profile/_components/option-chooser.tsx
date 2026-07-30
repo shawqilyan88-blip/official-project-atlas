@@ -80,8 +80,7 @@ function OptionCard({
       type="button"
       onClick={onClick}
       className={cn(
-        'group relative flex flex-col rounded-2xl border p-6 text-left transition-all duration-[--duration-fast]',
-        'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+        'focus-ring group relative flex flex-col rounded-2xl border p-6 text-left transition-all duration-[--duration-fast]',
         recommended
           ? 'border-primary/30 bg-primary/[0.04] hover:border-primary/50 hover:bg-primary/[0.07]'
           : 'border-border bg-card hover:border-border/80 hover:bg-muted/40',

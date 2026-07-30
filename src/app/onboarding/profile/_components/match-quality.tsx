@@ -46,7 +46,15 @@ export function MatchQuality({ strength }: { readonly strength: ProfileStrength 
       </div>
 
       {/* Animated fill. The width transition is the whole animation. */}
-      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
+      <div
+        role="progressbar"
+        aria-label="Match quality"
+        aria-valuenow={score}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuetext={`${score}% · ${tier}`}
+        className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"
+      >
         <div
           className={cn(
             'h-full rounded-full transition-[width] duration-[--duration-slow] ease-[--ease-out-quart]',

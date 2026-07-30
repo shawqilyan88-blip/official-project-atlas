@@ -19,7 +19,7 @@ import {
   type OpportunityDocument,
 } from '@/modules/trade-opportunity/domain/opportunity-document';
 import { idleState } from '@/shared/lib/action-state';
-import { Alert, Button, cn } from '@/shared/ui';
+import { Alert, Button, cn, Dialog, DialogClose, DialogContent } from '@/shared/ui';
 import {
   CheckIcon,
   ClockIcon,
@@ -396,7 +396,7 @@ function IconBtn({
       aria-label={label}
       title={label}
       className={cn(
-        'flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors',
+        'focus-ring flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors',
         'hover:bg-muted hover:text-foreground disabled:opacity-40',
         danger && 'hover:bg-destructive/10 hover:text-destructive',
       )}
@@ -414,27 +414,27 @@ function PreviewModal({
   onClose: () => void;
 }) {
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="Document preview"
-      className="fixed inset-0 z-[80] flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm"
-      onClick={onClose}
+    // Radix Dialog supplies what the hand-rolled version could not: Escape to
+    // close, a focus trap, and focus returned to the trigger on close.
+    <Dialog
+      open
+      onOpenChange={(next) => {
+        if (!next) onClose();
+      }}
     >
-      <div
-        className="animate-pop relative flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
+      <DialogContent
+        title="Document preview"
+        showClose={false}
+        className="flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden"
       >
         <div className="flex items-center justify-between border-b border-border/60 px-4 py-2.5">
           <span className="text-sm font-medium">Preview</span>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+          <DialogClose
+            className="focus-ring flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
             aria-label="Close preview"
           >
-            <XIcon className="size-4" />
-          </button>
+            <XIcon className="size-4" aria-hidden="true" />
+          </DialogClose>
         </div>
         <div className="min-h-0 flex-1 overflow-auto bg-muted/20">
           {preview.mime?.startsWith('image/') ? (
@@ -452,8 +452,8 @@ function PreviewModal({
             />
           )}
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 

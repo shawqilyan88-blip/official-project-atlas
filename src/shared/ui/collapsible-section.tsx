@@ -30,7 +30,7 @@ export function CollapsibleSection({
       <summary
         className={cn(
           'flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5',
-          'transition-colors hover:bg-muted/30 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+          'focus-ring transition-colors hover:bg-muted/30',
         )}
       >
         <div className="min-w-0">

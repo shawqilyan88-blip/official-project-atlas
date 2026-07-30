@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import type { UploadedDocument } from '@/modules/trade-profile/actions';
 import type {
@@ -8,6 +8,7 @@ import type {
   TradeOpportunityDraft,
 } from '@/modules/trade-opportunity/domain/trade-opportunity';
 import { Badge, cn } from '@/shared/ui';
+import { rovingIndex } from '@/shared/ui/utils/roving';
 import {
   ArrowRightIcon,
   BuildingIcon,
@@ -75,6 +76,7 @@ export function NewOpportunityFlow({
   const [phase, setPhase] = useState<Phase>('choose');
   const [objective, setObjective] = useState<TradeObjective>(baseDraft.objective);
   const [documents, setDocuments] = useState<readonly UploadedDocument[]>([]);
+  const directionRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   if (phase === 'manual') {
     return (
@@ -119,22 +121,40 @@ export function NewOpportunityFlow({
         </p>
       </div>
 
-      {/* Direction */}
+      {/* Direction — a single choice, so a radiogroup, not a row of toggles.
+          Roving tabindex + arrow keys give it the keyboard behaviour a native
+          radio group has. */}
       <div
+        role="radiogroup"
+        aria-label="Direction of trade"
         className="animate-rise grid gap-2.5 sm:grid-cols-3"
         style={{ ['--rise-delay' as string]: '40ms' }}
       >
-        {DIRECTIONS.map((direction) => {
+        {DIRECTIONS.map((direction, index) => {
           const Icon = direction.icon;
           const selected = objective === direction.value;
           return (
             <button
               key={direction.value}
+              ref={(el) => {
+                directionRefs.current[index] = el;
+              }}
               type="button"
+              role="radio"
+              aria-checked={selected}
+              tabIndex={selected ? 0 : -1}
               onClick={() => setObjective(direction.value)}
-              aria-pressed={selected}
+              onKeyDown={(event) => {
+                const next = rovingIndex(event.key, index, DIRECTIONS.length);
+                if (next < 0) return;
+                event.preventDefault();
+                const nextDirection = DIRECTIONS[next];
+                if (!nextDirection) return;
+                setObjective(nextDirection.value);
+                directionRefs.current[next]?.focus();
+              }}
               className={cn(
-                'flex flex-col items-start gap-1.5 rounded-2xl border p-4 text-left transition-all duration-[--duration-fast]',
+                'focus-ring flex flex-col items-start gap-1.5 rounded-2xl border p-4 text-left transition-all duration-[--duration-fast]',
                 selected
                   ? 'border-primary/60 bg-primary/[0.06] ring-2 ring-primary/20'
                   : 'border-border bg-card hover:border-border/80 hover:bg-muted/40',
@@ -226,8 +246,7 @@ function MethodCard({
       disabled={disabled}
       style={{ ['--rise-delay' as string]: `${delay}ms` }}
       className={cn(
-        'hover-lift animate-rise group relative flex w-full items-start gap-4 rounded-2xl border p-5 text-left',
-        'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+        'focus-ring hover-lift animate-rise group relative flex w-full items-start gap-4 rounded-2xl border p-5 text-left',
         disabled
           ? 'cursor-not-allowed border-border/60 bg-card/50 opacity-60'
           : recommended

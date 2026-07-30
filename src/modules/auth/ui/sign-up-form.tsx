@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState } from 'react';
+import { useActionState, useEffect, useRef } from 'react';
 
 import { MailCheckIcon } from '@/shared/ui/icons';
 import { routes } from '@/shared/config/routes';
@@ -18,6 +18,13 @@ export function SignUpForm() {
     signUpAction,
     idleState,
   );
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // On a rejected submit, move focus to the first field the server flagged.
+  useEffect(() => {
+    if (state.status !== 'error') return;
+    formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+  }, [state]);
 
   // Confirmation is a distinct step, not a toast: the user must leave for their
   // inbox, so the screen should stop asking them to do anything else.
@@ -28,7 +35,7 @@ export function SignUpForm() {
   const fieldErrors = state.status === 'error' ? state.fieldErrors : undefined;
 
   return (
-    <form action={formAction} className="space-y-5" noValidate>
+    <form ref={formRef} action={formAction} className="space-y-5" noValidate>
       {state.status === 'error' && !fieldErrors && (
         <Alert tone="error" title="Could not create your account">
           {state.message}
@@ -93,6 +100,15 @@ export function SignUpForm() {
 }
 
 function ConfirmationNotice({ email }: { email: string }) {
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  // Success replaces the form entirely, so move focus to the new heading — a
+  // screen reader announces "Confirm your email" instead of stranding focus on
+  // the now-removed submit button.
+  useEffect(() => {
+    headingRef.current?.focus();
+  }, []);
+
   return (
     <div className="space-y-5 text-center">
       <div
@@ -103,7 +119,9 @@ function ConfirmationNotice({ email }: { email: string }) {
       </div>
 
       <div className="space-y-2">
-        <h2 className="text-lg font-semibold">Confirm your email</h2>
+        <h2 ref={headingRef} tabIndex={-1} className="text-lg font-semibold outline-none">
+          Confirm your email
+        </h2>
         <p className="text-sm leading-relaxed text-balance text-muted-foreground">
           We sent a confirmation link to{' '}
           <span className="font-medium break-all text-foreground">{email}</span>. Open it

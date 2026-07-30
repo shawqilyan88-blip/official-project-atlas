@@ -176,7 +176,7 @@ export function DocumentIntelligence({
         onDrop={onDrop}
         className={cn(
           'flex cursor-pointer flex-col items-center rounded-2xl border-2 border-dashed px-6 py-12 text-center transition-colors',
-          'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+          'focus-ring',
           dragging
             ? 'border-primary/60 bg-primary/[0.06]'
             : 'border-border/70 bg-card/40 hover:border-border',

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState } from 'react';
+import { useActionState, useEffect, useRef } from 'react';
 
 import { Alert, Button, FormField } from '@/shared/ui';
 import { routes } from '@/shared/config/routes';
@@ -14,11 +14,19 @@ export function SignInForm({ redirectTo }: { redirectTo?: string }) {
     signInAction,
     idleState,
   );
+  const formRef = useRef<HTMLFormElement>(null);
 
   const fieldErrors = state.status === 'error' ? state.fieldErrors : undefined;
 
+  // On a rejected submit, move focus to the first field the server flagged, so
+  // keyboard and screen-reader users are taken straight to what needs fixing.
+  useEffect(() => {
+    if (state.status !== 'error') return;
+    formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+  }, [state]);
+
   return (
-    <form action={formAction} className="space-y-5" noValidate>
+    <form ref={formRef} action={formAction} className="space-y-5" noValidate>
       {/* Carried through the round trip so the user lands where they intended.
           The server re-sanitises it; this is only transport. */}
       {redirectTo !== undefined && (
