@@ -108,6 +108,8 @@ export function OpportunityEditor({
   const [criteria, setCriteria] = useState(initialDraft.criteria ?? '');
   const [notes, setNotes] = useState(initialDraft.notes ?? '');
   const objectiveRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const productFieldRef = useRef<HTMLDivElement>(null);
+  const [productError, setProductError] = useState<string | null>(null);
 
   const suggestedName = suggestOpportunityName({ product, objective, markets });
   const backHref = opportunityId
@@ -122,6 +124,16 @@ export function OpportunityEditor({
   };
 
   const submit = (status: 'draft' | 'active') => {
+    // Activating starts a real search, which Atlas cannot do without a product.
+    // Catch it on the client so the user is not bounced by the server. Drafts
+    // stay unguarded, so partial progress can always be saved.
+    if (status === 'active' && product.trim().length === 0) {
+      setProductError('Add a product or service — Atlas needs it to start searching.');
+      productFieldRef.current?.querySelector('input')?.focus();
+      return;
+    }
+    setProductError(null);
+
     const payload = {
       name: name.trim() || suggestedName,
       objective,
@@ -239,15 +251,22 @@ export function OpportunityEditor({
             </div>
           </div>
 
-          <FormField
-            label="Product or service"
-            name="product"
-            value={product}
-            onChange={(event) => setProduct(event.target.value)}
-            placeholder="e.g. Green Edamame, Frozen Mango, Corrugated packaging"
-            hint="What this opportunity is about. Needed before Atlas can search."
-            maxLength={OPPORTUNITY_LIMITS.productMax}
-          />
+          <div ref={productFieldRef}>
+            <FormField
+              label="Product or service"
+              name="product"
+              required
+              value={product}
+              onChange={(event) => {
+                setProduct(event.target.value);
+                if (productError) setProductError(null);
+              }}
+              placeholder="e.g. Green Edamame, Frozen Mango, Corrugated packaging"
+              hint="What this opportunity is about. Needed before Atlas can search."
+              maxLength={OPPORTUNITY_LIMITS.productMax}
+              errors={productError !== null ? [productError] : undefined}
+            />
+          </div>
 
           <FormField
             label="Name"

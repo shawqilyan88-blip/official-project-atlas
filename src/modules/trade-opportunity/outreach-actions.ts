@@ -7,7 +7,6 @@ import type { TenantContext } from '@/core/entities';
 import { isFailure, isSuccess } from '@/core/result';
 import { createServerContainer } from '@/server/container';
 import { getSession } from '@/server/session';
-import { serverEnv } from '@/shared/config/env';
 import { routes } from '@/shared/config/routes';
 import {
   type ActionState,
@@ -117,7 +116,10 @@ export async function draftMessageAction(
   );
   if (isFailure(draft)) return fromAppError(draft.error);
 
-  const aiGenerated = Boolean(serverEnv().ANTHROPIC_API_KEY);
+  // Provenance reflects what actually produced the draft (D.1 PAT-PROV), not
+  // whether a key happens to be configured — so a fallback template is never
+  // mislabelled as an AI draft.
+  const aiGenerated = draft.value.source === 'ai';
   const created = await opportunityMessages.createDraft({
     organizationId: context.organization.id,
     opportunityId,
@@ -183,7 +185,7 @@ export async function regenerateDraftAction(
     subject: draft.value.subject,
     body: draft.value.body,
     status: 'draft',
-    aiGenerated: Boolean(serverEnv().ANTHROPIC_API_KEY),
+    aiGenerated: draft.value.source === 'ai',
   });
   if (isFailure(updated)) return fromAppError(updated.error);
 

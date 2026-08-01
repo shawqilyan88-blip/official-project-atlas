@@ -1,14 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import {
-  type DragEvent,
-  startTransition,
-  useActionState,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { startTransition, useActionState, useEffect, useState } from 'react';
 
 import {
   applyExtractionAction,
@@ -16,13 +9,12 @@ import {
 } from '@/modules/trade-opportunity/document-actions';
 import type { ExtractionField } from '@/modules/trade-opportunity/domain/extraction';
 import { idleState } from '@/shared/lib/action-state';
-import { Alert, Button, cn } from '@/shared/ui';
+import { Alert, Button, Dropzone, cn } from '@/shared/ui';
 import {
   CheckIcon,
   FileTextIcon,
   Loader2Icon,
   SparklesIcon,
-  UploadCloudIcon,
   XIcon,
 } from '@/shared/ui/icons';
 
@@ -65,9 +57,7 @@ export function DocumentIntelligence({
 }) {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
-  const [dragging, setDragging] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const [extractState, extractAction, extracting] = useActionState(
     extractDocumentAction,
@@ -88,12 +78,6 @@ export function DocumentIntelligence({
       return;
     }
     setFile(picked);
-  };
-
-  const onDrop = (event: DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setDragging(false);
-    choose(event.dataTransfer.files?.[0] ?? null);
   };
 
   const analyze = () => {
@@ -160,53 +144,18 @@ export function DocumentIntelligence({
         </Alert>
       )}
 
-      {/* Drop zone */}
-      <div
-        role="button"
-        tabIndex={0}
-        onClick={() => inputRef.current?.click()}
-        onKeyDown={(e) =>
-          (e.key === 'Enter' || e.key === ' ') && inputRef.current?.click()
+      {/* Pick a document to analyze (this stores nothing until you apply). */}
+      <Dropzone
+        onFiles={(files) => choose(files[0] ?? null)}
+        accept={ACCEPT}
+        multiple={false}
+        label={
+          <>
+            Drop a business document, or <span className="text-primary">browse</span>
+          </>
         }
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragging(true);
-        }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={onDrop}
-        className={cn(
-          'flex cursor-pointer flex-col items-center rounded-2xl border-2 border-dashed px-6 py-12 text-center transition-colors',
-          'focus-ring',
-          dragging
-            ? 'border-primary/60 bg-primary/[0.06]'
-            : 'border-border/70 bg-card/40 hover:border-border',
-        )}
-      >
-        <span
-          className={cn(
-            'mb-4 flex size-12 items-center justify-center rounded-2xl transition-transform',
-            dragging
-              ? 'scale-110 bg-primary text-primary-foreground'
-              : 'bg-primary/10 text-primary',
-          )}
-          aria-hidden="true"
-        >
-          <UploadCloudIcon className="size-6" />
-        </span>
-        <p className="text-sm font-medium">
-          Drop a business document, or <span className="text-primary">browse</span>
-        </p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          LOI, RFQ, PO, spec, or catalog · PDF, image, or text · up to {MAX_MB} MB
-        </p>
-        <input
-          ref={inputRef}
-          type="file"
-          accept={ACCEPT}
-          className="hidden"
-          onChange={(e) => choose(e.target.files?.[0] ?? null)}
-        />
-      </div>
+        hint={`LOI, RFQ, PO, spec, or catalog · PDF, image, or text · up to ${MAX_MB} MB`}
+      />
 
       {/* Selected file + analyze */}
       {file && (

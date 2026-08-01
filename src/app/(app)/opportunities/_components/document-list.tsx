@@ -19,7 +19,15 @@ import {
   type OpportunityDocument,
 } from '@/modules/trade-opportunity/domain/opportunity-document';
 import { idleState } from '@/shared/lib/action-state';
-import { Alert, Button, cn, Dialog, DialogClose, DialogContent } from '@/shared/ui';
+import {
+  Alert,
+  Button,
+  cn,
+  ConfirmDialog,
+  Dialog,
+  DialogClose,
+  DialogContent,
+} from '@/shared/ui';
 import {
   CheckIcon,
   ClockIcon,
@@ -59,6 +67,10 @@ export function DocumentList({
   const [preview, setPreview] = useState<{ url: string; mime: string | null } | null>(
     null,
   );
+  // Delete confirmation target, and the ids being optimistically removed so the
+  // row disappears the moment you confirm rather than after the round-trip.
+  const [pendingDelete, setPendingDelete] = useState<OpportunityDocument | null>(null);
+  const [removingIds, setRemovingIds] = useState<readonly string[]>([]);
 
   const uploadRef = useRef<HTMLInputElement>(null);
   const replaceRef = useRef<HTMLInputElement>(null);
@@ -107,14 +119,19 @@ export function DocumentList({
   };
 
   const doDelete = async (id: string) => {
-    setBusy(id);
+    setError(null);
+    // Optimistic: hide the row immediately; restore it if the server refuses.
+    setRemovingIds((ids) => [...ids, id]);
     const fd = new FormData();
     fd.set('id', id);
     fd.set('opportunityId', opportunityId);
     const res = await deleteOpportunityDocumentAction(idleState, fd);
-    setBusy(null);
-    if (res.status === 'error') setError(res.message);
-    else refresh();
+    if (res.status === 'error') {
+      setRemovingIds((ids) => ids.filter((x) => x !== id));
+      setError(res.message);
+    } else {
+      refresh();
+    }
   };
 
   const openDoc = async (doc: OpportunityDocument, mode: 'download' | 'preview') => {
@@ -130,6 +147,9 @@ export function DocumentList({
     if (mode === 'preview') setPreview({ url: res.data, mime: doc.mimeType });
     else window.open(res.data, '_blank', 'noopener');
   };
+
+  // Hide rows being optimistically deleted until the server catches up.
+  const visible = current.filter((doc) => !removingIds.includes(doc.id));
 
   return (
     <div className="space-y-4">
@@ -199,13 +219,13 @@ export function DocumentList({
       />
 
       {/* Documents */}
-      {current.length === 0 ? (
+      {visible.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-border/70 bg-card/40 px-4 py-8 text-center text-sm text-muted-foreground">
           No documents attached yet. Upload an LOI, RFQ, PO, spec, or catalog above.
         </p>
       ) : (
         <ul className="space-y-2.5">
-          {current.map((doc) => {
+          {visible.map((doc) => {
             const history = historyOf(doc.id);
             const isBusy = busy === doc.id;
             return (
@@ -313,13 +333,7 @@ export function DocumentList({
                     </IconBtn>
                     <IconBtn
                       label="Delete"
-                      onClick={() => {
-                        if (
-                          window.confirm(`Delete ${doc.fileName}? This cannot be undone.`)
-                        ) {
-                          void doDelete(doc.id);
-                        }
-                      }}
+                      onClick={() => setPendingDelete(doc)}
                       disabled={isBusy}
                       danger
                     >
@@ -371,6 +385,22 @@ export function DocumentList({
       {preview !== null && (
         <PreviewModal preview={preview} onClose={() => setPreview(null)} />
       )}
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingDelete(null);
+        }}
+        title={pendingDelete ? `Delete ${pendingDelete.fileName}?` : 'Delete document?'}
+        description="This permanently removes the document and its version history. This cannot be undone."
+        confirmLabel="Delete"
+        tone="destructive"
+        onConfirm={() => {
+          const target = pendingDelete;
+          setPendingDelete(null);
+          if (target) void doDelete(target.id);
+        }}
+      />
     </div>
   );
 }

@@ -35,10 +35,19 @@ export interface ConversationMessage {
   readonly createdAt: string;
 }
 
+/**
+ * How a draft was actually produced. `ai` means a model wrote it; `template`
+ * means the honest fallback template was used (no key, or the model call
+ * failed). This travels with the draft so the UI labels provenance by what
+ * really happened, never by whether a key is merely present.
+ */
+export type DraftSource = 'ai' | 'template';
+
 /** A drafted message before it is persisted. */
 export interface MessageDraft {
   readonly subject: string;
   readonly body: string;
+  readonly source: DraftSource;
 }
 
 /**

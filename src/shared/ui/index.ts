@@ -18,7 +18,9 @@ export {
   CardTitle,
 } from './card';
 export { CollapsibleSection } from './collapsible-section';
+export { ConfirmDialog } from './confirm-dialog';
 export { Dialog, DialogClose, DialogContent, DialogTrigger } from './dialog';
+export { Dropzone } from './dropzone';
 export {
   DropdownMenu,
   DropdownMenuCheckboxItem,

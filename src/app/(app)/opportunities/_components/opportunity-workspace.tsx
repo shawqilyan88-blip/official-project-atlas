@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { type ReactNode, useRef, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 
 import type {
   OpportunityDocument,
@@ -70,7 +70,7 @@ const TABS: readonly Tab[] = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboardIcon },
   { id: 'companies', label: 'Companies', icon: UsersIcon },
   { id: 'documents', label: 'Documents', icon: FileTextIcon },
-  { id: 'analysis', label: 'AI Analysis', icon: SparklesIcon },
+  { id: 'analysis', label: 'Brief summary', icon: SparklesIcon },
   { id: 'conversations', label: 'Conversations', icon: MessagesSquareIcon },
   { id: 'timeline', label: 'Timeline', icon: ClockIcon },
   { id: 'deals', label: 'Deals', icon: BriefcaseIcon },
@@ -93,7 +93,44 @@ export function OpportunityWorkspace({
 }) {
   const [active, setActive] = useState<TabId>('overview');
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const tablistRef = useRef<HTMLDivElement>(null);
+  // Which edges of the (horizontally scrolling) tab bar are faded, to signal
+  // there are more tabs off-screen — the common mobile discoverability gap.
+  const [fade, setFade] = useState({ start: false, end: false });
   const editHref = `${routes.opportunities}/${opportunity.id}/edit`;
+
+  const updateFade = useCallback(() => {
+    const el = tablistRef.current;
+    if (!el) return;
+    setFade({
+      start: el.scrollLeft > 2,
+      end: el.scrollLeft + el.clientWidth < el.scrollWidth - 2,
+    });
+  }, []);
+
+  useEffect(() => {
+    updateFade();
+    window.addEventListener('resize', updateFade);
+    return () => window.removeEventListener('resize', updateFade);
+  }, [updateFade]);
+
+  // Keep the active tab in view — when it changes via keyboard on a narrow
+  // screen it may sit off-screen. `nearest` never moves an already-visible tab,
+  // so the desktop bar (where every tab fits) is untouched.
+  useEffect(() => {
+    const index = TABS.findIndex((tab) => tab.id === active);
+    tabRefs.current[index]?.scrollIntoView({ inline: 'nearest', block: 'nearest' });
+    updateFade();
+  }, [active, updateFade]);
+
+  const maskImage =
+    fade.start && fade.end
+      ? 'linear-gradient(to right, transparent, #000 1.25rem, #000 calc(100% - 1.25rem), transparent)'
+      : fade.start
+        ? 'linear-gradient(to right, transparent, #000 1.25rem)'
+        : fade.end
+          ? 'linear-gradient(to right, #000 calc(100% - 1.25rem), transparent)'
+          : undefined;
 
   return (
     <div className="space-y-6">
@@ -131,9 +168,12 @@ export function OpportunityWorkspace({
           tab is in the tab order), arrow keys move and activate, Home/End jump
           to the ends, and each tab owns its panel via aria-controls. */}
       <div
+        ref={tablistRef}
         role="tablist"
         aria-label="Opportunity sections"
-        className="flex gap-1 overflow-x-auto border-b border-border/70 pb-px"
+        onScroll={updateFade}
+        style={maskImage ? { maskImage, WebkitMaskImage: maskImage } : undefined}
+        className="flex [scrollbar-width:none] gap-1 overflow-x-auto border-b border-border/70 pb-px [&::-webkit-scrollbar]:hidden"
       >
         {TABS.map((tab, index) => {
           const selected = tab.id === active;
@@ -351,9 +391,11 @@ function DocumentsPanel({
             <SparklesIcon className="size-4" />
           </span>
           <div>
-            <h2 className="text-sm font-semibold">Analyze with Atlas</h2>
+            <h2 className="text-sm font-semibold">Extract details from a document</h2>
             <p className="text-xs text-muted-foreground">
-              Read a document and apply what Atlas understands to this opportunity.
+              Upload a file and Atlas reads it — review what it finds, then apply it to
+              this brief. Your stored documents stay above; nothing is saved until you
+              apply.
             </p>
           </div>
         </div>
@@ -390,10 +432,12 @@ function AnalysisPanel({
             <SparklesIcon className="size-4" />
           </span>
           <div>
-            <h2 className="text-sm font-semibold">Here&rsquo;s what Atlas understands</h2>
+            <h2 className="text-sm font-semibold">
+              What Atlas understands from your brief
+            </h2>
             <p className="text-xs text-muted-foreground">
-              Built from what you&rsquo;ve entered. Automatic extraction from uploaded
-              documents is coming soon — nothing here is guessed.
+              A summary of the details you&rsquo;ve entered — nothing here is guessed. To
+              pull details out of a document instead, use Analyze in the Documents tab.
             </p>
           </div>
         </div>

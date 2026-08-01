@@ -111,7 +111,7 @@ function extractDraft(body: unknown): MessageDraft | null {
   const subject = toolUse?.input?.subject;
   const text = toolUse?.input?.body;
   if (typeof subject !== 'string' || typeof text !== 'string') return null;
-  return { subject: subject.trim(), body: text.trim() };
+  return { subject: subject.trim(), body: text.trim(), source: 'ai' };
 }
 
 /** An honest, obviously-templated draft — used when AI drafting is unavailable. */
@@ -119,6 +119,7 @@ function templateDraft(context: DraftContext): MessageDraft {
   const product = context.opportunity.product ?? 'our products';
   const verb = context.company.role === 'supplier' ? 'source' : 'supply';
   return {
+    source: 'template',
     subject: `Introduction — ${context.sender.companyName} × ${context.company.name}`,
     body:
       `Dear ${context.company.name} team,\n\n` +

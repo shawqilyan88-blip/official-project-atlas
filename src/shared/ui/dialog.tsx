@@ -24,13 +24,18 @@ export function DialogContent({
   className,
   children,
   title,
+  titleClassName = 'sr-only',
   description,
+  descriptionClassName = 'sr-only',
   showClose = true,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
-  /** Required: every dialog needs an accessible name. Rendered visually hidden. */
+  /** Required: every dialog needs an accessible name. Hidden by default. */
   title: string;
+  /** Override to render the title visibly (e.g. a confirmation dialog). */
+  titleClassName?: string;
   description?: string;
+  descriptionClassName?: string;
   /** Renders the built-in close affordance in the top-right. */
   showClose?: boolean;
 }) {
@@ -51,11 +56,12 @@ export function DialogContent({
         )}
         {...props}
       >
-        {/* Visually hidden but announced — satisfies the dialog naming
-            requirement without imposing a visible header on every dialog. */}
-        <DialogPrimitive.Title className="sr-only">{title}</DialogPrimitive.Title>
+        {/* Announced as the dialog's name. Hidden by default so a dialog can
+            own its visible header; callers that want the title shown pass a
+            visible `titleClassName`. */}
+        <DialogPrimitive.Title className={titleClassName}>{title}</DialogPrimitive.Title>
         {description !== undefined && (
-          <DialogPrimitive.Description className="sr-only">
+          <DialogPrimitive.Description className={descriptionClassName}>
             {description}
           </DialogPrimitive.Description>
         )}

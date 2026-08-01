@@ -1,6 +1,6 @@
 'use client';
 
-import { type DragEvent, useRef, useState } from 'react';
+import { useState } from 'react';
 
 import {
   type UploadedDocument,
@@ -12,14 +12,12 @@ import {
   rejectDocument,
 } from '@/modules/trade-profile/domain/schemas';
 import { idleState } from '@/shared/lib/action-state';
-import { Alert, Button, cn } from '@/shared/ui';
+import { Alert, Button, Dropzone } from '@/shared/ui';
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
   ClockIcon,
   FileTextIcon,
-  Loader2Icon,
-  UploadCloudIcon,
 } from '@/shared/ui/icons';
 
 /**
@@ -51,12 +49,10 @@ export function LoiUpload({
   readonly onContinue: () => void;
   readonly onBack: () => void;
 }) {
-  const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [dragging, setDragging] = useState(false);
 
-  const accept = async (files: readonly File[]) => {
+  const uploadFiles = async (files: readonly File[]) => {
     setError(null);
     setUploading(true);
     try {
@@ -80,12 +76,6 @@ export function LoiUpload({
     }
   };
 
-  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setDragging(false);
-    void accept(Array.from(event.dataTransfer.files));
-  };
-
   return (
     <div className="mx-auto w-full max-w-xl">
       <div className="mb-6">
@@ -102,58 +92,13 @@ export function LoiUpload({
         </Alert>
       )}
 
-      <div
-        role="button"
-        tabIndex={0}
-        onClick={() => inputRef.current?.click()}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            inputRef.current?.click();
-          }
-        }}
-        onDragOver={(event) => {
-          event.preventDefault();
-          setDragging(true);
-        }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={handleDrop}
-        className={cn(
-          'flex cursor-pointer flex-col items-center rounded-2xl border-2 border-dashed px-6 py-10 text-center transition-colors',
-          'focus-ring',
-          dragging
-            ? 'border-primary/60 bg-primary/[0.06]'
-            : 'border-border bg-card hover:border-primary/40 hover:bg-muted/30',
-        )}
-      >
-        <span
-          className="mb-3 flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary"
-          aria-hidden="true"
-        >
-          {uploading ? (
-            <Loader2Icon className="size-6 animate-spin" />
-          ) : (
-            <UploadCloudIcon className="size-6" />
-          )}
-        </span>
-        <p className="text-sm font-medium">
-          {uploading ? 'Uploading…' : 'Drag your document here, or click to browse'}
-        </p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          PDF, Word, Excel, images, or text · up to {MAX_DOCUMENT_SIZE_LABEL}
-        </p>
-        <input
-          ref={inputRef}
-          type="file"
-          multiple
-          accept={ACCEPTED_DOCUMENT_EXTENSIONS}
-          className="sr-only"
-          onChange={(event) => {
-            if (event.target.files) void accept(Array.from(event.target.files));
-            event.target.value = '';
-          }}
-        />
-      </div>
+      <Dropzone
+        onFiles={(files) => void uploadFiles(files)}
+        uploading={uploading}
+        accept={ACCEPTED_DOCUMENT_EXTENSIONS}
+        label="Drag your document here, or click to browse"
+        hint={`PDF, Word, Excel, images, or text · up to ${MAX_DOCUMENT_SIZE_LABEL}`}
+      />
 
       <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="Supported documents">
         {SUPPORTED.map((item) => (
