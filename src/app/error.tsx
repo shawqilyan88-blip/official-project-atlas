@@ -28,7 +28,7 @@ export default function ErrorBoundary({
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-4 py-12">
       <Card elevated>
         <CardHeader>
-          <CardTitle>Something went wrong</CardTitle>
+          <CardTitle>Atlas ran into a problem</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm leading-relaxed text-muted-foreground">

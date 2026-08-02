@@ -58,7 +58,7 @@ export function toActionState(error: unknown): ActionState<never> {
   if (isAppError(error)) return fromAppError(error);
 
   console.error('[action] Unhandled error', error);
-  return errorState('Something went wrong. Please try again.');
+  return errorState('That didn’t go through. Please try again.');
 }
 
 export function fromAppError(error: AppError): ActionState<never> {

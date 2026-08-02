@@ -154,7 +154,7 @@ export function DocumentList({
   return (
     <div className="space-y-4">
       {error !== null && (
-        <Alert tone="error" title="Something went wrong">
+        <Alert tone="error" title="That didn’t go through">
           {error}
         </Alert>
       )}

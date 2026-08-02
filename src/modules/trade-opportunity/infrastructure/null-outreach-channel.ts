@@ -22,8 +22,8 @@ export class NullOutreachChannel implements OutreachChannel {
     const result: ChannelSendResult = {
       status: 'not_configured',
       message:
-        'No messaging channel is connected. Approve keeps the message ready to send; ' +
-        'connect a channel to deliver it.',
+        "Nothing was sent — sending isn't available yet. Your approved message is saved " +
+        'and ready to go the moment a channel is connected.',
     };
     return success(result);
   }

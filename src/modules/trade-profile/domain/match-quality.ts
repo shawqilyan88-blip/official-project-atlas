@@ -28,7 +28,7 @@ export interface ProfileSignals {
   readonly languages: readonly string[];
 }
 
-export type ProfileTier = 'starting' | 'developing' | 'strong' | 'excellent';
+export type ProfileTier = 'forming' | 'developing' | 'strong' | 'ready';
 
 export interface ProfileStrength {
   /** 0–100, reads directly as a percentage for the progress bar. */
@@ -127,17 +127,20 @@ function isPresent(value: ProfileSignals[keyof ProfileSignals]): boolean {
 }
 
 const HEADLINES: Record<ProfileTier, string> = {
-  starting: 'Add your products so Atlas knows what to search for.',
+  forming: 'Add your products so Atlas knows what to search for.',
   developing: 'Good start — a few more details will sharpen your matches.',
   strong: 'This profile is strong enough to find verified buyers and suppliers.',
-  excellent: 'Excellent — Atlas can match you with high precision.',
+  ready: 'Ready — Atlas can match you with high precision.',
 };
 
+// Shared readiness ladder (Forming → Developing → Strong → Ready) with the same
+// thresholds used for opportunity quality, so a tier word means the same thing
+// on every surface (D.2 CT-6 / PAT-RL).
 function tierFor(score: number): ProfileTier {
-  if (score < 25) return 'starting';
-  if (score < 50) return 'developing';
-  if (score < 75) return 'strong';
-  return 'excellent';
+  if (score < 40) return 'forming';
+  if (score < 65) return 'developing';
+  if (score < 85) return 'strong';
+  return 'ready';
 }
 
 export function assessProfileStrength(signals: ProfileSignals): ProfileStrength {

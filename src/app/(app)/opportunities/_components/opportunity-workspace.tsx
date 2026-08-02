@@ -290,21 +290,21 @@ function OverviewPanel({
       <section className="relative overflow-hidden rounded-3xl border border-primary/15 bg-gradient-to-br from-primary/[0.09] via-card to-card p-6 sm:p-7">
         <div
           aria-hidden="true"
-          className="animate-breathe pointer-events-none absolute -top-24 -right-16 size-64 rounded-full bg-primary/20 blur-3xl"
+          className="pointer-events-none absolute -top-24 -right-16 size-64 rounded-full bg-primary/20 blur-3xl"
         />
         <div className="relative">
           <div className="mb-4 flex items-center gap-3">
             <span className="relative flex size-9 items-center justify-center">
               <span
                 aria-hidden="true"
-                className="animate-orbit absolute inset-0 rounded-full border border-dashed border-primary/40"
+                className="absolute inset-0 rounded-full border border-dashed border-primary/40"
               />
-              <span className="animate-breathe flex size-7 items-center justify-center rounded-full bg-primary text-primary-foreground">
+              <span className="flex size-7 items-center justify-center rounded-full bg-primary text-primary-foreground">
                 <SparklesIcon className="size-4" aria-hidden="true" />
               </span>
             </span>
             <div>
-              <p className="text-sm font-semibold">Atlas is preparing this search</p>
+              <p className="text-sm font-semibold">The search Atlas will run</p>
               <p className="text-xs text-muted-foreground">
                 {searchDescription(opportunity.objective, opportunity.targetMarkets)}
               </p>
@@ -341,8 +341,8 @@ function OverviewPanel({
           </ol>
 
           <p className="mt-5 rounded-xl border border-dashed border-primary/30 bg-primary/[0.04] px-3.5 py-2.5 text-xs leading-relaxed text-muted-foreground">
-            Live discovery activates in an upcoming release. When it does, buyers and
-            suppliers appear under Companies automatically — no re-entry.
+            Discovery activates soon. When it’s live, buyers and suppliers appear under
+            Companies automatically — no re-entry.
           </p>
         </div>
       </section>
@@ -550,8 +550,8 @@ function QualityMeter({
   compact?: boolean;
 }) {
   const tierLabel =
-    quality.tier === 'excellent'
-      ? 'Excellent'
+    quality.tier === 'ready'
+      ? 'Ready'
       : quality.tier === 'strong'
         ? 'Strong'
         : quality.tier === 'developing'
@@ -583,7 +583,7 @@ function QualityMeter({
         <div
           className={cn(
             'h-full rounded-full transition-[width] duration-[--duration-slow] ease-[--ease-out-quart]',
-            quality.tier === 'excellent' ? 'bg-success' : 'bg-primary',
+            quality.tier === 'ready' ? 'bg-success' : 'bg-primary',
           )}
           style={{ width: `${Math.max(quality.score, 3)}%` }}
         />
@@ -641,11 +641,7 @@ function TimelinePanel({
             }
           />
         ))}
-        <TimelineRow
-          title="Atlas begins discovery"
-          detail="Activates in an upcoming release."
-          isLast
-        />
+        <TimelineRow title="Atlas begins discovery" detail="Activates soon." isLast />
       </ol>
     </section>
   );

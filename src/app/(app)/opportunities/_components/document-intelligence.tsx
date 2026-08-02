@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { startTransition, useActionState, useEffect, useState } from 'react';
 
@@ -8,12 +9,13 @@ import {
   extractDocumentAction,
 } from '@/modules/trade-opportunity/document-actions';
 import type { ExtractionField } from '@/modules/trade-opportunity/domain/extraction';
+import { routes } from '@/shared/config/routes';
 import { idleState } from '@/shared/lib/action-state';
-import { Alert, Button, Dropzone, cn } from '@/shared/ui';
+import { Alert, Button, ConfirmDialog, Dropzone, cn } from '@/shared/ui';
 import {
   CheckIcon,
   FileTextIcon,
-  Loader2Icon,
+  PencilIcon,
   SparklesIcon,
   XIcon,
 } from '@/shared/ui/icons';
@@ -22,23 +24,13 @@ import {
  * Document intelligence — upload a business document, let Atlas read it, review
  * and edit what it understood, and apply it to the opportunity.
  *
- * The pipeline stages are shown while the real extraction runs; they narrate
- * genuine work, they do not fake it. If no model is configured, or the format
- * isn't supported, the result says so plainly and the user continues manually —
- * nothing is ever invented.
+ * While the real extraction runs, Atlas shows an honest waiting state — an
+ * expectation, then a still-working message — never fabricated stages or
+ * progress (D.3). If no model is configured, or the format isn't supported, the
+ * result says so plainly and the user continues manually — nothing is invented.
  */
 const ACCEPT = '.pdf,.png,.jpg,.jpeg,.webp,.txt,.csv';
 const MAX_MB = 15;
-
-const STAGES = [
-  'Reading document',
-  'Understanding products',
-  'Detecting countries',
-  'Extracting specifications',
-  'Detecting quantities',
-  'Understanding certifications',
-  'Building trade opportunity',
-] as const;
 
 interface Row {
   readonly key: string;
@@ -48,7 +40,29 @@ interface Row {
   readonly confidence: number;
   include: boolean;
   text: string;
+  /** Set once the user has confirmed the value — the "Confirmed by you" state. */
+  reviewed: boolean;
 }
+
+/**
+ * Certainty bands (D.2). Atlas's self-reported per-field confidence is never
+ * shown as a precise number; it is translated — conservatively — into one of
+ * three plain bands, each mapped to a single action. An unknown or low value
+ * reads "Needs review", never a fabricated middle number.
+ */
+type Band = 'clear' | 'likely' | 'review';
+
+function bandOf(confidence: number): Band {
+  if (confidence >= 0.8) return 'clear';
+  if (confidence >= 0.6) return 'likely';
+  return 'review';
+}
+
+const BAND_LABEL: Record<Band, string> = {
+  clear: 'Clearly stated',
+  likely: 'Likely',
+  review: 'Needs review',
+};
 
 export function DocumentIntelligence({
   opportunityId,
@@ -108,8 +122,8 @@ export function DocumentIntelligence({
     return (
       <ReviewSummary
         key={`${file?.name ?? 'doc'}-${result.overallConfidence}-${result.fields.length}`}
+        opportunityId={opportunityId}
         fields={result.fields}
-        confidence={result.overallConfidence}
         missing={result.missing}
         fileName={file?.name ?? 'document'}
         applying={applying}
@@ -189,20 +203,19 @@ export function DocumentIntelligence({
 }
 
 function Pipeline({ fileName }: { fileName: string }) {
-  const [active, setActive] = useState(0);
+  // Honest waiting (D.3 PAT-WA): set an expectation, then move to a still-working
+  // message once the wait outlasts it — the message changes only because real
+  // time has passed. The orb is genuine work-motion (this IS running); there are
+  // no fabricated steps, checkmarks, or percentages.
+  const [longWait, setLongWait] = useState(false);
   useEffect(() => {
-    // Advance through stages while the real extraction runs; hold on the last
-    // until the server responds and the parent swaps this out.
-    const id = setInterval(
-      () => setActive((i) => Math.min(i + 1, STAGES.length - 1)),
-      650,
-    );
-    return () => clearInterval(id);
+    const timer = setTimeout(() => setLongWait(true), 8000);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
     <section className="rounded-2xl border border-border/70 bg-card p-5 sm:p-6">
-      <div className="mb-5 flex items-center gap-3">
+      <div className="flex items-center gap-3">
         <span className="relative flex size-9 items-center justify-center">
           <span
             aria-hidden="true"
@@ -212,56 +225,22 @@ function Pipeline({ fileName }: { fileName: string }) {
             <SparklesIcon className="size-4" aria-hidden="true" />
           </span>
         </span>
-        <div>
+        <div aria-live="polite">
           <p className="text-sm font-semibold">Atlas is reading {fileName}</p>
           <p className="text-xs text-muted-foreground">
-            Extracting the trade opportunity…
+            {longWait
+              ? 'Still reading — larger files take longer.'
+              : 'Usually a few seconds. I’ll show you what I find to review.'}
           </p>
         </div>
       </div>
-      <ol className="space-y-2.5" aria-live="polite">
-        {STAGES.map((stage, index) => {
-          const state = index < active ? 'done' : index === active ? 'active' : 'idle';
-          return (
-            <li key={stage} className="flex items-center gap-3">
-              <span
-                className={cn(
-                  'flex size-5 shrink-0 items-center justify-center rounded-full border',
-                  state === 'done'
-                    ? 'border-success/40 bg-success/15 text-success'
-                    : state === 'active'
-                      ? 'border-primary/50 bg-primary/10 text-primary'
-                      : 'border-border bg-muted/40 text-muted-foreground',
-                )}
-                aria-hidden="true"
-              >
-                {state === 'done' ? (
-                  <CheckIcon className="size-3" />
-                ) : state === 'active' ? (
-                  <Loader2Icon className="size-3 animate-spin" />
-                ) : (
-                  <span className="size-1.5 rounded-full bg-current opacity-40" />
-                )}
-              </span>
-              <span
-                className={cn(
-                  'text-sm',
-                  state === 'idle' ? 'text-muted-foreground/60' : 'text-foreground',
-                )}
-              >
-                {stage}
-              </span>
-            </li>
-          );
-        })}
-      </ol>
     </section>
   );
 }
 
 function ReviewSummary({
+  opportunityId,
   fields,
-  confidence,
   missing,
   fileName,
   applying,
@@ -270,8 +249,8 @@ function ReviewSummary({
   onApply,
   onReset,
 }: {
+  opportunityId: string;
   fields: readonly ExtractionField[];
-  confidence: number;
   missing: readonly string[];
   fileName: string;
   applying: boolean;
@@ -289,9 +268,20 @@ function ReviewSummary({
       confidence: f.confidence,
       include: true,
       text: Array.isArray(f.value) ? f.value.join(', ') : String(f.value),
+      reviewed: false,
     })),
   );
-  const pct = Math.round(confidence * 100);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [appliedCount, setAppliedCount] = useState(0);
+
+  // Surface the weakest link, not an average (D.2 CA-5): how many fields still
+  // need a look. The apply gate (D.2 §8) only counts ones being applied.
+  const needsReview = rows.filter(
+    (r) => !r.reviewed && bandOf(r.confidence) === 'review',
+  ).length;
+  const applyNeedsReview = rows.filter(
+    (r) => r.include && !r.reviewed && bandOf(r.confidence) === 'review',
+  ).length;
 
   const submit = () => {
     const accepted: ExtractionField[] = rows
@@ -310,6 +300,7 @@ function ReviewSummary({
                 .filter(Boolean)
             : r.text.trim(),
       }));
+    setAppliedCount(accepted.length);
     onApply(accepted);
   };
 
@@ -332,16 +323,35 @@ function ReviewSummary({
               </p>
             </div>
           </div>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-2.5 py-1 text-xs font-medium text-muted-foreground">
-            Confidence <span className="text-foreground tabular-nums">{pct}%</span>
-          </span>
+          {rows.length > 0 && (
+            <span
+              className={cn(
+                'inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium',
+                needsReview > 0
+                  ? 'border-warning/40 bg-warning/[0.08] text-warning'
+                  : 'border-success/30 bg-success/10 text-success',
+              )}
+            >
+              {needsReview > 0
+                ? `${needsReview} field${needsReview > 1 ? 's' : ''} need review`
+                : 'Ready to apply'}
+            </span>
+          )}
         </div>
 
         {rows.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            Atlas didn’t find structured fields in this document. You can still complete
-            the brief manually.
-          </p>
+          <div>
+            <p className="text-sm text-muted-foreground">
+              Atlas didn’t find structured fields in this document. You can still complete
+              the brief manually.
+            </p>
+            <Button asChild variant="outline" size="sm" className="mt-4">
+              <Link href={`${routes.opportunities}/${opportunityId}/edit`}>
+                <PencilIcon aria-hidden="true" />
+                Complete the brief
+              </Link>
+            </Button>
+          </div>
         ) : (
           <ul className="space-y-2.5">
             {rows.map((row, index) => (
@@ -359,7 +369,15 @@ function ReviewSummary({
                     <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
                       {row.label}
                     </span>
-                    <ConfidenceDot confidence={row.confidence} />
+                    <BandLabel
+                      band={bandOf(row.confidence)}
+                      reviewed={row.reviewed}
+                      onReview={() =>
+                        setRows((rs) =>
+                          rs.map((r, i) => (i === index ? { ...r, reviewed: true } : r)),
+                        )
+                      }
+                    />
                   </div>
                   <label className="flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground">
                     <input
@@ -411,6 +429,12 @@ function ReviewSummary({
               </li>
             ))}
           </ul>
+          <Button asChild variant="outline" size="sm" className="mt-4">
+            <Link href={`${routes.opportunities}/${opportunityId}/edit`}>
+              <PencilIcon aria-hidden="true" />
+              Complete the brief
+            </Link>
+          </Button>
         </section>
       )}
 
@@ -427,12 +451,13 @@ function ReviewSummary({
         {applied ? (
           <span className="inline-flex items-center gap-1.5 text-sm font-medium text-success">
             <CheckIcon className="size-4" aria-hidden="true" />
-            Applied to the opportunity
+            Applied {appliedCount} {appliedCount === 1 ? 'detail' : 'details'} to your
+            brief
           </span>
         ) : (
           <Button
             type="button"
-            onClick={submit}
+            onClick={() => (applyNeedsReview > 0 ? setConfirmOpen(true) : submit())}
             loading={applying}
             loadingLabel="Applying…"
           >
@@ -441,22 +466,68 @@ function ReviewSummary({
           </Button>
         )}
       </div>
+
+      {/* Applying still-unverified fields to the brief asks for a look first
+          (D.2 §8 review trigger). It is a prompt, not a wall — you can proceed. */}
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title={`${applyNeedsReview} field${applyNeedsReview > 1 ? 's' : ''} still need review`}
+        description="Some values Atlas couldn't verify are included. Review them first, or apply anyway — you can always edit the brief afterwards."
+        confirmLabel="Apply anyway"
+        cancelLabel="Keep reviewing"
+        onConfirm={() => {
+          setConfirmOpen(false);
+          submit();
+        }}
+      />
     </div>
   );
 }
 
-function ConfidenceDot({ confidence }: { confidence: number }) {
-  const tone =
-    confidence >= 0.8 ? 'bg-success' : confidence >= 0.5 ? 'bg-primary' : 'bg-warning';
-  return (
-    <span
-      className="inline-flex items-center gap-1"
-      title={`Confidence ${Math.round(confidence * 100)}%`}
-    >
-      <span className={cn('size-1.5 rounded-full', tone)} aria-hidden="true" />
-      <span className="text-[0.625rem] text-muted-foreground tabular-nums">
-        {Math.round(confidence * 100)}%
+function BandLabel({
+  band,
+  reviewed,
+  onReview,
+}: {
+  band: Band;
+  reviewed: boolean;
+  onReview: () => void;
+}) {
+  if (reviewed) {
+    return (
+      <span className="inline-flex items-center gap-1 text-[0.6875rem] font-medium text-success">
+        <CheckIcon className="size-3" aria-hidden="true" />
+        Confirmed by you
       </span>
+    );
+  }
+  // Verbal-first, and "Needs review" is the loudest state (D.2 CT-4/AX).
+  const tone =
+    band === 'review'
+      ? 'border-warning/40 bg-warning/[0.1] text-warning'
+      : band === 'likely'
+        ? 'border-border/70 bg-muted/50 text-muted-foreground'
+        : 'border-success/30 bg-success/10 text-success';
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <span
+        className={cn(
+          'rounded-full border px-1.5 py-0.5 text-[0.625rem] font-medium',
+          tone,
+        )}
+      >
+        {BAND_LABEL[band]}
+      </span>
+      {band !== 'clear' && (
+        <button
+          type="button"
+          onClick={onReview}
+          className="focus-ring rounded text-[0.625rem] font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+        >
+          Mark reviewed
+        </button>
+      )}
     </span>
   );
 }

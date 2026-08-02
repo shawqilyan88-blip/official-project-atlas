@@ -1,44 +1,58 @@
+import Link from 'next/link';
+
 import type { PersonalizationSnapshot } from '@/modules/personalization/domain/personalization';
-import { SparklesIcon } from '@/shared/ui/icons';
+import type {
+  LookingFor,
+  TradeProfile,
+} from '@/modules/trade-profile/domain/trade-profile';
+import { routes } from '@/shared/config/routes';
+import { ArrowRightIcon, SparklesIcon } from '@/shared/ui/icons';
 
 /**
- * The About You card — a first, visible surface of the personalization seam.
+ * The About You card — what Atlas actually knows about the user's business.
  *
- * The full About You page does not exist yet, but the concept earns a place on
- * the dashboard now because it is core to the product's promise: Atlas gets to
- * know you. The card shows what Atlas has already learned (today, just the
- * timezone) and names what it is still learning, so the idea of a system that
- * adapts over time is present from day one rather than bolted on later.
- *
- * It reads from the same `PersonalizationSnapshot` the greeting engine uses, so
- * when the About You page starts writing real learned facts, this fills in with
- * no change here.
+ * It reflects real, stated facts: the company profile (what you trade, your
+ * markets, industry, and whether you're finding buyers or suppliers) plus the
+ * timezone learned from the browser. It never claims to be "learning" things it
+ * has no way to know, and it points to the one action that sharpens it — keeping
+ * the profile current (D.5: every surface guides the next step; nothing implies
+ * capability that isn't real).
  */
-interface Learnable {
+interface Fact {
   readonly label: string;
   readonly value: string | null;
+  /** Shown, muted, when the value is not set. */
+  readonly empty: string;
 }
 
 export function AboutYouCard({
   personalization,
+  profile,
 }: {
   personalization: PersonalizationSnapshot;
+  profile: TradeProfile | null;
 }) {
-  // Today only the timezone is known; the rest are shown as "learning" so the
-  // adaptive nature of the feature is legible before the data exists.
-  const learned: readonly Learnable[] = [
-    { label: 'Timezone', value: timezoneLabel(personalization.timezone) },
-    { label: 'Working hours', value: factValue(personalization, 'Working hours') },
-    { label: 'Primary markets', value: factValue(personalization, 'Primary markets') },
-    { label: 'What you trade', value: factValue(personalization, 'What you trade') },
-    { label: 'Industry', value: factValue(personalization, 'Industry') },
+  const facts: readonly Fact[] = [
     {
-      label: 'Buyer & supplier preferences',
-      value: factValue(personalization, 'Buyer & supplier preferences'),
+      label: 'What you trade',
+      value: joinList(profile?.products ?? []),
+      empty: 'Not set',
     },
     {
-      label: 'Communication style',
-      value: factValue(personalization, 'Communication style'),
+      label: 'Primary markets',
+      value: countLabel(profile?.countries.length ?? 0, 'market', 'markets'),
+      empty: 'Not set',
+    },
+    { label: 'Industry', value: profile?.industry ?? null, empty: 'Not set' },
+    {
+      label: 'Finding',
+      value: lookingForLabel(profile?.lookingFor ?? null),
+      empty: 'Not set',
+    },
+    {
+      label: 'Timezone',
+      value: timezoneLabel(personalization.timezone),
+      empty: 'Not detected yet',
     },
   ];
 
@@ -55,26 +69,22 @@ export function AboutYouCard({
         </h2>
       </div>
       <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-muted-foreground">
-        Atlas learns your markets, your buyer and supplier preferences, and how you like
-        to work — and adapts. Here is what it knows so far.
+        What Atlas knows about your business, drawn from your profile. The fuller it is,
+        the sharper every match.
       </p>
 
       <dl className="mt-4 space-y-2.5">
-        {learned.map((item) => (
-          <div key={item.label} className="flex items-center justify-between gap-3">
-            <dt className="text-[0.8125rem] text-muted-foreground">{item.label}</dt>
+        {facts.map((fact) => (
+          <div key={fact.label} className="flex items-center justify-between gap-3">
+            <dt className="text-[0.8125rem] text-muted-foreground">{fact.label}</dt>
             <dd>
-              {item.value !== null ? (
+              {fact.value !== null ? (
                 <span className="rounded-md bg-primary/10 px-2 py-0.5 text-[0.75rem] font-medium text-primary">
-                  {item.value}
+                  {fact.value}
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 text-[0.75rem] text-muted-foreground/70">
-                  <span
-                    className="animate-breathe size-1.5 rounded-full bg-muted-foreground/50"
-                    aria-hidden="true"
-                  />
-                  Learning…
+                <span className="text-[0.75rem] text-muted-foreground/60">
+                  {fact.empty}
                 </span>
               )}
             </dd>
@@ -82,12 +92,35 @@ export function AboutYouCard({
         ))}
       </dl>
 
-      <p className="mt-4 border-t border-border/60 pt-3 text-xs leading-relaxed text-muted-foreground/80">
-        The more you work with Atlas, the more this fills in — and the sharper its
-        suggestions get.
-      </p>
+      <div className="mt-4 border-t border-border/60 pt-3">
+        <Link
+          href={routes.onboardingProfile}
+          className="focus-ring inline-flex items-center gap-1 rounded text-xs font-medium text-primary hover:underline"
+        >
+          Update your profile
+          <ArrowRightIcon className="size-3.5" aria-hidden="true" />
+        </Link>
+      </div>
     </section>
   );
+}
+
+function joinList(items: readonly string[]): string | null {
+  if (items.length === 0) return null;
+  const shown = items.slice(0, 2).join(', ');
+  return items.length > 2 ? `${shown} +${items.length - 2}` : shown;
+}
+
+function countLabel(count: number, one: string, many: string): string | null {
+  if (count === 0) return null;
+  return `${count} ${count === 1 ? one : many}`;
+}
+
+function lookingForLabel(lookingFor: LookingFor | null): string | null {
+  if (lookingFor === 'buyers') return 'Buyers';
+  if (lookingFor === 'suppliers') return 'Suppliers';
+  if (lookingFor === 'both') return 'Buyers & suppliers';
+  return null;
 }
 
 function timezoneLabel(timezone: string): string | null {
@@ -95,11 +128,4 @@ function timezoneLabel(timezone: string): string | null {
   // Show the city, not the region prefix: "Europe/London" -> "London".
   const city = timezone.split('/').pop();
   return city ? city.replaceAll('_', ' ') : timezone;
-}
-
-function factValue(
-  personalization: PersonalizationSnapshot,
-  label: string,
-): string | null {
-  return personalization.facts.find((fact) => fact.label === label)?.value ?? null;
 }

@@ -116,7 +116,7 @@ export function AtlasToday() {
             'text-sm text-muted-foreground',
           )}
         >
-          Tell Atlas what you trade in the command bar above, and real entries replace
+          Start an opportunity above to point Atlas at a market, and real entries replace
           this preview.
         </div>
       </div>

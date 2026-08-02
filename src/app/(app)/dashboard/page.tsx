@@ -8,7 +8,6 @@ import { resolveDashboardView } from '@/modules/dashboard/application/resolve-da
 import {
   needsTradeProfileOnboarding,
   shouldRemindAboutProfile,
-  suggestedActions,
 } from '@/modules/trade-profile/domain/trade-profile';
 import { createServerContainer } from '@/server/container';
 import { requireTenantContext } from '@/server/session';
@@ -80,7 +79,6 @@ export default async function DashboardPage() {
   });
 
   const metrics = resolveBusinessPulse();
-  const commandSuggestions = suggestedActions(profile?.lookingFor ?? null);
 
   const journeySteps: JourneyStep[] = [
     { label: 'Workspace created', state: 'done' },
@@ -125,7 +123,7 @@ export default async function DashboardPage() {
         </Button>
       </div>
 
-      <CommandCenter firstName={view.firstName} suggestions={commandSuggestions} />
+      <CommandCenter firstName={view.firstName} />
 
       <BusinessPulse metrics={metrics} />
 
@@ -138,7 +136,7 @@ export default async function DashboardPage() {
 
         <div className="flex flex-col gap-4">
           <ProgressJourney steps={journeySteps} />
-          <AboutYouCard personalization={personalizationSnapshot} />
+          <AboutYouCard personalization={personalizationSnapshot} profile={profile} />
         </div>
       </div>
     </div>

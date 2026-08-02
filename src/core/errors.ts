@@ -138,7 +138,7 @@ export class InfrastructureError extends AppError {
   override readonly httpStatus = 502;
 
   constructor(
-    message = 'Something went wrong on our side. Please try again.',
+    message = 'Atlas ran into a problem on our end. Please try again.',
     options?: { cause?: unknown },
   ) {
     super(message, options);
@@ -150,7 +150,7 @@ export class UnexpectedError extends AppError {
   override readonly httpStatus = 500;
 
   constructor(
-    message = 'Something went wrong. Please try again.',
+    message = 'That didn’t go through. Please try again.',
     options?: { cause?: unknown },
   ) {
     super(message, options);

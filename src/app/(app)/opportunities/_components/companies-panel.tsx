@@ -3,10 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { type ReactNode, useState } from 'react';
 
-import {
-  runDiscoveryAction,
-  setCompanyStatusAction,
-} from '@/modules/trade-opportunity/discovery-actions';
+import { setCompanyStatusAction } from '@/modules/trade-opportunity/discovery-actions';
 import {
   COMPANY_STATUS_LABEL,
   type CompanyStatus,
@@ -14,27 +11,26 @@ import {
 } from '@/modules/trade-opportunity/domain/opportunity-company';
 import type { TradeObjective } from '@/modules/trade-opportunity/domain/trade-opportunity';
 import { idleState } from '@/shared/lib/action-state';
-import { Alert, Button, cn } from '@/shared/ui';
+import { Alert, cn } from '@/shared/ui';
 import {
   ArrowUpRightIcon,
   BuildingIcon,
   CheckIcon,
   ClockIcon,
   Loader2Icon,
-  SparklesIcon,
   TargetIcon,
   UsersIcon,
   XIcon,
 } from '@/shared/ui/icons';
 
 /**
- * The Companies tab — the live face of the Discovery Engine.
+ * The Companies tab — where discovered buyers and suppliers will be qualified.
  *
- * "Run discovery" queries the configured providers, ranks the merged
- * candidates, and lists them for qualification. With only the placeholder
- * provider connected it reports honestly ("no provider connected") and surfaces
- * nothing invented — the pipeline and ranking light up automatically the moment
- * a real provider is added.
+ * Discovery is not live yet, and this surface says so honestly and consistently
+ * with every other mention of it (Overview, Timeline, navigation): it activates
+ * soon, and when it does, ranked matches appear here automatically — no manual
+ * trigger, no re-entry. The card + pipeline below light up the moment real
+ * companies exist.
  */
 export function CompaniesPanel({
   opportunityId,
@@ -46,9 +42,8 @@ export function CompaniesPanel({
   readonly companies: readonly OpportunityCompany[];
 }) {
   const router = useRouter();
-  const [running, setRunning] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
-  const [note, setNote] = useState<{ tone: 'info' | 'error'; text: string } | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const who =
     objective === 'find_suppliers'
@@ -57,79 +52,24 @@ export function CompaniesPanel({
         ? 'buyers and suppliers'
         : 'buyers';
 
-  const runDiscovery = async () => {
-    setRunning(true);
-    setNote(null);
-    const fd = new FormData();
-    fd.set('opportunityId', opportunityId);
-    const res = await runDiscoveryAction(idleState, fd);
-    setRunning(false);
-    if (res.status === 'error') {
-      setNote({ tone: 'error', text: res.message });
-    } else if (res.status === 'success' && res.data) {
-      if (res.data.status === 'ok') {
-        setNote({ tone: 'info', text: `Discovery added ${res.data.added} companies.` });
-      } else {
-        setNote({
-          tone: 'info',
-          text:
-            res.data.message ??
-            'Discovery ran, but no data provider is connected yet — nothing was invented.',
-        });
-      }
-    }
-    router.refresh();
-  };
-
   const changeStatus = async (id: string, status: CompanyStatus) => {
     setBusy(id);
+    setError(null);
     const fd = new FormData();
     fd.set('id', id);
     fd.set('opportunityId', opportunityId);
     fd.set('status', status);
     const res = await setCompanyStatusAction(idleState, fd);
     setBusy(null);
-    if (res.status === 'error') setNote({ tone: 'error', text: res.message });
+    if (res.status === 'error') setError(res.message);
     else router.refresh();
   };
 
   return (
     <div className="space-y-4">
-      {/* Run bar */}
-      <section className="flex flex-col gap-3 rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.06] via-card to-card p-5 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-start gap-3">
-          <span
-            className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"
-            aria-hidden="true"
-          >
-            <TargetIcon className="size-5" />
-          </span>
-          <div>
-            <h2 className="text-sm font-semibold">Discover {who}</h2>
-            <p className="text-xs text-muted-foreground">
-              Atlas queries connected trade-data providers, ranks matches by fit, and
-              lists them here to qualify.
-            </p>
-          </div>
-        </div>
-        <Button
-          type="button"
-          onClick={runDiscovery}
-          loading={running}
-          loadingLabel="Discovering…"
-          className="shrink-0"
-        >
-          <SparklesIcon aria-hidden="true" />
-          Run discovery
-        </Button>
-      </section>
-
-      {note !== null && (
-        <Alert
-          tone={note.tone === 'error' ? 'error' : 'info'}
-          title={note.tone === 'error' ? 'Something went wrong' : 'Discovery'}
-        >
-          {note.text}
+      {error !== null && (
+        <Alert tone="error" title="That didn’t go through">
+          {error}
         </Alert>
       )}
 
@@ -141,15 +81,15 @@ export function CompaniesPanel({
           >
             <UsersIcon className="size-6" />
           </span>
-          <h3 className="text-base font-semibold">No companies yet</h3>
+          <h3 className="text-base font-semibold">Discovery activates soon</h3>
           <p className="mt-1.5 max-w-md text-sm leading-relaxed text-balance text-muted-foreground">
-            Run discovery to surface qualified {who} ranked by fit. The engine is ready —
-            once a data provider is connected, real companies appear here with no further
-            setup.
+            When it’s live, {who} matched to this opportunity appear here automatically —
+            ranked by fit and ready to qualify. Your brief is ready, so nothing will need
+            re-entering.
           </p>
           <span className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-border/60 px-2.5 py-1 text-[0.6875rem] font-medium text-muted-foreground">
             <ClockIcon className="size-3" aria-hidden="true" />
-            Provider-agnostic · ready to connect
+            Activating soon
           </span>
         </section>
       ) : (

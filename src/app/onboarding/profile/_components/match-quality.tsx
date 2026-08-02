@@ -1,8 +1,24 @@
 'use client';
 
-import type { ProfileStrength } from '@/modules/trade-profile/domain/match-quality';
+import type {
+  ProfileStrength,
+  ProfileTier,
+} from '@/modules/trade-profile/domain/match-quality';
 import { cn } from '@/shared/ui';
 import { SparklesIcon, StarIcon } from '@/shared/ui/icons';
+
+/**
+ * The shared readiness ladder, in words. Verbal-first: the tier is always shown
+ * as a word, so strength survives colour-blindness, screen readers, and the
+ * stars being decorative (D.2 CT-1/AX-1, PAT-RL). Same words as the opportunity
+ * quality meter.
+ */
+const TIER_LABEL: Record<ProfileTier, string> = {
+  forming: 'Forming',
+  developing: 'Developing',
+  strong: 'Strong',
+  ready: 'Ready',
+};
 
 /**
  * The live "Match quality" meter.
@@ -39,9 +55,9 @@ export function MatchQuality({ strength }: { readonly strength: ProfileStrength 
         </div>
         <span
           className="text-sm font-semibold text-muted-foreground tabular-nums"
-          aria-label={`${score} percent complete`}
+          aria-label={`${score} percent complete — ${TIER_LABEL[tier]}`}
         >
-          {score}%
+          {score}% · <span className="text-foreground">{TIER_LABEL[tier]}</span>
         </span>
       </div>
 
@@ -52,13 +68,13 @@ export function MatchQuality({ strength }: { readonly strength: ProfileStrength 
         aria-valuenow={score}
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-valuetext={`${score}% · ${tier}`}
+        aria-valuetext={`${score}% · ${TIER_LABEL[tier]}`}
         className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"
       >
         <div
           className={cn(
             'h-full rounded-full transition-[width] duration-[--duration-slow] ease-[--ease-out-quart]',
-            tier === 'excellent' ? 'bg-success' : 'bg-primary',
+            tier === 'ready' ? 'bg-success' : 'bg-primary',
           )}
           style={{ width: `${Math.max(score, 3)}%` }}
         />

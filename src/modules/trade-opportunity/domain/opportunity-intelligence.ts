@@ -59,7 +59,7 @@ export function summariseOpportunity(o: TradeOpportunity): OpportunitySummary {
 
 // --- 2. Completeness / quality score --------------------------------------
 
-export type QualityTier = 'forming' | 'developing' | 'strong' | 'excellent';
+export type QualityTier = 'forming' | 'developing' | 'strong' | 'ready';
 
 export interface MissingField {
   readonly label: string;
@@ -157,14 +157,17 @@ const QUALITY_HEADLINES: Record<QualityTier, string> = {
   forming: 'Add a product and markets so Atlas can start understanding this opportunity.',
   developing: 'Taking shape — a few more details will sharpen who Atlas surfaces.',
   strong: 'Well understood. Atlas can run a focused search from this.',
-  excellent: 'Excellent — Atlas has everything it needs for a precise search.',
+  ready: 'Ready — Atlas has everything it needs for a precise search.',
 };
 
+// Shared readiness ladder (Forming → Developing → Strong → Ready) with the same
+// thresholds used for profile strength, so a tier word means the same thing on
+// every surface (D.2 CT-6 / PAT-RL).
 function qualityTier(score: number): QualityTier {
   if (score < 40) return 'forming';
   if (score < 65) return 'developing';
   if (score < 85) return 'strong';
-  return 'excellent';
+  return 'ready';
 }
 
 export function assessOpportunityQuality(o: TradeOpportunity): OpportunityQuality {

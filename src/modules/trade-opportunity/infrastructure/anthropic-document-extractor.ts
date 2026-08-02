@@ -92,8 +92,8 @@ export class AnthropicDocumentExtractor implements DocumentExtractor {
         overallConfidence: 0,
         missing: [],
         message:
-          'AI document understanding is not configured yet. Add ANTHROPIC_API_KEY to ' +
-          'enable it — until then, complete the opportunity manually.',
+          "Reading documents automatically isn't available on this workspace yet. " +
+          'You can complete the brief manually — every field is editable.',
       });
     }
 
@@ -130,7 +130,7 @@ export class AnthropicDocumentExtractor implements DocumentExtractor {
       });
     } catch (cause) {
       return this.failed(
-        'Could not reach the extraction service. Please try again.',
+        "Atlas couldn't read the document just now. Try again, or complete the brief manually.",
         cause,
       );
     }
@@ -140,8 +140,8 @@ export class AnthropicDocumentExtractor implements DocumentExtractor {
       console.error(`[extractor] Anthropic API ${response.status}: ${detail}`);
       return this.failed(
         response.status === 401
-          ? 'The AI extraction key was rejected. Check ANTHROPIC_API_KEY.'
-          : 'Extraction failed while reading the document. Please try again.',
+          ? "Reading documents automatically isn't available right now. Complete the brief manually and you're set."
+          : "Atlas couldn't read the document just now. Try again, or complete the brief manually.",
       );
     }
 
@@ -150,7 +150,7 @@ export class AnthropicDocumentExtractor implements DocumentExtractor {
       body = await response.json();
     } catch (cause) {
       return this.failed(
-        'The extraction service returned an unreadable response.',
+        "Atlas couldn't read the document just now. Try again, or complete the brief manually.",
         cause,
       );
     }

@@ -80,10 +80,11 @@ export function ConversationsPanel({
           >
             <MessagesSquareIcon className="size-6" />
           </span>
-          <h3 className="text-base font-semibold">No conversations yet</h3>
+          <h3 className="text-base font-semibold">Outreach starts with companies</h3>
           <p className="mt-1.5 max-w-md text-sm leading-relaxed text-balance text-muted-foreground">
-            Shortlist a buyer or supplier in the Companies tab, then draft your first
-            outreach here.
+            Once you have buyers or suppliers to contact, Atlas drafts a tailored message
+            for each here — you review, approve, and send. Discovery activates soon, and
+            matches will appear under Companies ready to message.
           </p>
         </section>
       ) : (
@@ -126,7 +127,10 @@ function ConversationCard({
     const res = await fn();
     setBusy(false);
     if (res.status === 'error')
-      setNote({ tone: 'error', text: res.message ?? 'Something went wrong.' });
+      setNote({
+        tone: 'error',
+        text: res.message ?? 'That didn’t go through — please try again.',
+      });
     else router.refresh();
     return res;
   };
